@@ -236,9 +236,6 @@ export class MultiplayerRoom {
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];
   server.serializeAttachment({peer,role,name});
   this.ctx.acceptWebSocket(server);
-  server.addEventListener('message',event=>this.onMessage(server,event.data));
-  server.addEventListener('close',()=>this.onClose(server));
-  server.addEventListener('error',()=>this.onClose(server));
   const current=[...members,{peer,role,name}];
   this.send(server,{type:'welcome',self:peer,role,players:current.map(({peer,role,name})=>({peer,role,name}))});
   this.broadcast({type:'player-joined',player:{peer,role,name}},server);
@@ -246,7 +243,7 @@ export class MultiplayerRoom {
  }
  send(ws,data){try{ws.send(JSON.stringify(data));}catch{}}
  broadcast(data,except=null){for(const ws of this.ctx.getWebSockets()){if(ws!==except)this.send(ws,data);}}
- onMessage(ws,raw){
+ webSocketMessage(ws,raw){
   if(typeof raw!=='string'||raw.length>20000){try{ws.close(1009,'Message too large');}catch{}return;}
   let msg;try{msg=JSON.parse(raw);}catch{return;}
   const sender=ws.deserializeAttachment();if(!sender)return;
@@ -262,7 +259,7 @@ export class MultiplayerRoom {
   if(msg.signalType==='answer'&&sender.role!=='client')return;
   this.send(recipient,{type:'signal',from:sender.peer,signalType:msg.signalType,data:msg.data});
  }
- onClose(ws){
+ webSocketClose(ws,code,reason,wasClean){
   const meta=ws.deserializeAttachment();if(!meta)return;
   if(meta.role==='host'){
    for(const other of this.ctx.getWebSockets()){try{other.close(1000,'Host left');}catch{}}
@@ -270,4 +267,5 @@ export class MultiplayerRoom {
   }
   this.broadcast({type:'player-left',peer:meta.peer});
  }
+ webSocketError(ws,error){this.webSocketClose(ws,1011,'socket error',false);}
 }
