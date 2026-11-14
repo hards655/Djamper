@@ -1,5 +1,4 @@
-// Заповни після розгортання Cloudflare Worker.
+// Налаштування API ДЖАМПЕРА.
 window.GAME_CONFIG = {
-  apiBase: 'https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev',
-  telegramBot: 'YOUR_BOT_USERNAME' // без символу @
+  apiBase: 'https://djamper.hardy65444.workers.dev'
 };
