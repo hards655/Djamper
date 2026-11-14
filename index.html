@@ -99,8 +99,14 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
 #themeToggle,#themePause{border-style:dashed}
 @media(max-height:650px){.card{padding:10px 13px 13px}h1{font-size:40px}.subtitle{font-size:17px}.mascot{width:46px;height:46px;margin-bottom:5px}}
 
+
+.skinGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;max-height:48vh;overflow:auto;padding:2px}
+.skinItem{border:1.5px solid #78966d;border-radius:9px;background:#fffdf6;padding:9px 6px;text-align:center;min-width:0}
+.skinSwatch{width:43px;height:43px;margin:0 auto 5px;border:2px solid #294b3a;border-radius:45% 45% 35% 35%;display:flex;align-items:center;justify-content:center;font-size:24px}
+.skinItem strong{display:block;font-size:16px}.skinItem small{display:block;font-size:13px;opacity:.75;margin:2px 0 6px}.skinItem button{width:100%;padding:6px 4px;font-size:14px}
+.skinItem.exclusive{border-color:#b88a27;background:#fff6d9}.shopNote{font-size:13px;opacity:.72;line-height:1.35}
 </style></head><body><main id="app"><canvas id="game" aria-label="Нахил або дотики ліворуч і праворуч — рух, угорі — постріл"></canvas><div id="hud" class="hidden"><div><div id="score">0</div><div id="best">РЕКОРД 0</div></div><div class="buttons"><button id="sound" aria-label="Увімкнути або вимкнути звук">♪</button><button id="pause" aria-label="Пауза">Ⅱ</button></div></div><div id="effects"></div><div id="hint" class="hidden">← ДОТИК / НАХИЛ → · УГОРІ — ПОСТРІЛ</div><div id="toast" class="hidden" role="status"></div>
-<section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button></div><button id="start" class="primary wide">Почати ↑</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
+<section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button><button id="shopBtn" class="small wide">🎨 Магазин скінів</button></div><button id="start" class="primary wide">Почати ↑</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
 <section id="instructionModal" class="overlay hidden" aria-modal="true" role="dialog" aria-labelledby="instructionTitle"><div class="card"><div class="eyebrow">ПРАВИЛА ГРИ</div><h2 id="instructionTitle">Інструкція</h2><div class="instructions"><div class="sectionTitle">КЕРУВАННЯ</div><b>← →</b> Утримуйте ліву / праву половину екрана або нахиляйте телефон.<br><b>↑</b> Торкніться верхньої чверті екрана, щоб стріляти.<br><b>↻</b> Стрибки автоматичні. Краї екрана з’єднані.<br><b>Комп’ютер:</b> A/D або стрілки — рух, пробіл — постріл, P / Esc — пауза.
 <div class="sectionTitle">ПЛАТФОРМИ</div><div class="legend">Зелені — звичайні; сині — рухомі; коричневі — ламаються; пунктирні — зникають після стрибка; червоні — вибухають через 2 секунди після дотику.</div>
 <div class="sectionTitle">ОСОБЛИВІ ПЛАТФОРМИ</div><div class="legend"><b>Фіолетові ↕</b> перевертають напрямок гравітації на 10 секунд: відштовхуйтеся від платформ знизу! Блакитні L — низька гравітація на 10 секунд. Рожеві T — телепорт угору. Оминайте шипи!</div>
@@ -116,7 +122,7 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
     <button id="closeLeaderboard" class="primary wide">Назад</button>
   </div>
 </section>
-<section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
+<section id="shopModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">МАГАЗИН ПЕРСОНАЖІВ</div><h2>🎨 Обери свій скін</h2><div id="shopStatus" class="footnote">Завантаження магазину…</div><div id="skinGrid" class="skinGrid"></div><div class="shopNote">Оплата — Telegram Stars ⭐. Скін назавжди прив’язується до твого профілю.</div><button id="closeShop" class="primary wide">Назад</button></div></section><section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
   <div class="card leaderboardCard">
     <div class="eyebrow">ПАНЕЛЬ ТВОРЦЯ</div><h2>⚙ Керування ролями</h2>
     <div id="adminStatus" class="footnote">Завантаження гравців…</div>
@@ -206,7 +212,7 @@ function drawPlatform(q){const y=q.y-camera;if(y<-55||y>H+30)return;const colors
 const x=q.x+q.w/2;if(q.type==='moving')text('↔',x,y+7,14);if(q.type==='break'){path([[x-12,y],[x-3,y+5],[x-8,y+9],[x+2,y+13]],'#72523f',2);path([[x+11,y],[x+5,y+5],[x+10,y+9]],'#72523f',1.5);}if(q.type==='gravity')text(q.used?'·':'↕',x,y+6,15,'#5e358b');if(q.type==='low')text(q.used?'·':'L',x,y+7,11,'#287d8a');if(q.type==='teleport'){text('T',x,y+7,11,'#9b397d');ctx.globalAlpha=.35+.2*Math.sin(time*5);ellipse(x,y-9,15,20,'#edb7dc15','#c35ba7',1.5);ctx.globalAlpha=1;}if(q.type==='bomb'){text(q.timer>0?q.timer.toFixed(1):'!',x,y+6,11,'#9c3434');if(q.timer>0){ctx.globalAlpha=.25+.25*Math.sin(time*25);box(q.x-3,y-3,q.w+6,19,7,'#fa4d3e',null);ctx.globalAlpha=1;}}if(q.spike){for(let i=8;i<q.w-6;i+=14){ctx.beginPath();ctx.moveTo(q.x+i-5,y);ctx.lineTo(q.x+i,y-12);ctx.lineTo(q.x+i+5,y);ctx.closePath();ctx.fillStyle='#a5a5ad';ctx.fill();ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.stroke();}}if(q.bonus)drawBonus(q.bonus,x,y);ctx.restore();}
 function drawEnemy(e){const y=e.y-camera;if(y<-70||y>H+80)return;ctx.save();ctx.translate(e.x,y);if(e.type==='ufo'){const g=ctx.createLinearGradient(0,8,0,220);g.addColorStop(0,'#74bcaa40');g.addColorStop(1,'#74bcaa00');ctx.beginPath();ctx.moveTo(-18,8);ctx.lineTo(-75,220);ctx.lineTo(75,220);ctx.lineTo(18,8);ctx.closePath();ctx.fillStyle=g;ctx.fill();ellipse(0,-5,15,13,'#d8efe4');ellipse(0,5,28,10,e.hit>0?'#fff':'#aab7ca');ellipse(-11,4,3,2,'#f3e895',null);ellipse(0,8,3,2,'#e5a2b2',null);ellipse(11,4,3,2,'#9cddb4',null);ellipse(0,-7,7,5,'#9dc395',null);ellipse(-3,-8,1.4,2,INK,null);ellipse(3,-8,1.4,2,INK,null);}else if(e.type==='hole'){ctx.rotate(time*.8);for(let i=3;i>0;i--){ctx.save();ctx.rotate(i*1.2);ctx.beginPath();ctx.ellipse(0,0,23+i*8,12+i*4,.7,0,Math.PI*1.7);ctx.strokeStyle=['','#c4acd780','#ad8dc999','#8464b5'][i];ctx.lineWidth=2;ctx.stroke();ctx.restore();}ellipse(0,0,19,19,e.hit>0?'#bf9edf':'#342947','#72618d',3);ctx.rotate(-time*.8);text('•'.repeat(e.hp),0,33,11,'#8264a9');}else{if(e.type==='fly'){const flap=Math.sin(time*17)*9;path([[-15,-2],[-32,-17+flap],[-27,5],[-16,10]],'#a36591',3);path([[15,-2],[32,-17+flap],[27,5],[16,10]],'#a36591',3);}else{path([[-12,13],[-17,23],[-22,23]],INK,3);path([[12,13],[17,23],[22,23]],INK,3);}ellipse(0,0,20,18,e.hit>0?'#fff':e.type==='fly'?'#c39fc7':'#e2ac91');path([[-13,-12],[-15,-23],[-5,-16]],INK,2);path([[13,-12],[15,-23],[5,-16]],INK,2);ellipse(-7,-4,6,7,'#fff');ellipse(7,-4,6,7,'#fff');ellipse(-5,-3,2,3,INK,null);ellipse(5,-3,2,3,INK,null);path([[-7,9],[-1,6],[5,9],[9,6]],INK,2);}ctx.restore();}
 function drawPlayer(offset=0){const p=player;ctx.save();ctx.translate(p.x+offset,p.y-camera);if(p.invuln>0&&Math.floor(time*15)%2)ctx.globalAlpha=.5;if(p.shield>0){ellipse(0,0,29+Math.sin(time*7),34,'#a6dcf426','#59b0d5',2);ellipse(-13,-18,4,7,'#ffffffa0',null);}if(p.low>0){ctx.setLineDash([3,6]);ellipse(0,0,35,40,'#ffffff00','#6ab8c380',1);ctx.setLineDash([]);}if(p.invert>0)ctx.rotate(Math.PI);else ctx.rotate(p.vx*.00025);const squash=p.squash/.2;ctx.scale(1+squash*.2,1-squash*.18);if(p.jet>0){box(-23,-4,11,28,4,'#d9dde0');box(12,-4,11,28,4,'#d9dde0');for(const x of [-18,18]){ctx.beginPath();ctx.moveTo(x-5,23);ctx.lineTo(x,40+Math.sin(time*48)*9);ctx.lineTo(x+5,23);ctx.fillStyle='#ee9c49';ctx.fill();}}
-path([[-10,15],[-11,23],[-19,23]],INK,3);path([[10,15],[11,23],[19,23]],INK,3);ctx.beginPath();ctx.moveTo(-16,13);ctx.bezierCurveTo(-20,-24,-6,-27,5,-24);ctx.bezierCurveTo(19,-22,20,-2,16,14);ctx.quadraticCurveTo(0,20,-16,13);ctx.fillStyle=p.invert>0?'#c3a3ed':'#b6df88';ctx.fill();ctx.lineWidth=2.4;ctx.strokeStyle=INK;ctx.stroke();path([[-13,7],[12,7]],'#739b57',1);path([[-12,11],[13,11]],'#739b57',1);ellipse(-6,-12,4,6,'#fff',INK,1.5);ellipse(6,-12,4,6,'#fff',INK,1.5);ellipse(-6+p.face*1.4,-11,1.7,2.5,INK,null);ellipse(6+p.face*1.4,-11,1.7,2.5,INK,null);if(winterTheme){
+path([[-10,15],[-11,23],[-19,23]],INK,3);path([[10,15],[11,23],[19,23]],INK,3);ctx.beginPath();ctx.moveTo(-16,13);ctx.bezierCurveTo(-20,-24,-6,-27,5,-24);ctx.bezierCurveTo(19,-22,20,-2,16,14);ctx.quadraticCurveTo(0,20,-16,13);ctx.fillStyle=p.invert>0?'#c3a3ed':selectedSkin.color;ctx.fill();ctx.lineWidth=2.4;ctx.strokeStyle=INK;ctx.stroke();path([[-13,7],[12,7]],selectedSkin.accent,1);path([[-12,11],[13,11]],selectedSkin.accent,1);ellipse(-6,-12,4,6,'#fff',INK,1.5);ellipse(6,-12,4,6,'#fff',INK,1.5);ellipse(-6+p.face*1.4,-11,1.7,2.5,INK,null);ellipse(6+p.face*1.4,-11,1.7,2.5,INK,null);if(winterTheme){
 /* Об'ємна новорічна шапка: тканина, складки та пухнаста опушка */
 ctx.save();
 const hat=ctx.createLinearGradient(-10,-45,12,-17);
@@ -248,7 +254,11 @@ for(let i=0;i<5;i++){const a=i*Math.PI*2/5;
 ctx.beginPath();ctx.arc(8+Math.cos(a)*3,-46+Math.sin(a)*3,1.1,0,Math.PI*2);
 ctx.fillStyle='#fff';ctx.fill();}
 ctx.restore();
-}if(p.shoot>.12)box(-4,-33,8,16,3,'#d0e6a4');else box(p.face>0?9:-22,-9,13,8,4,'#c7e39b');if(p.prop>0){ellipse(0,-26,16,7,'#c8a9d8');path([[0,-29],[0,-38]],INK,2);ellipse(0,-39,22*Math.abs(Math.sin(time*32))+3,3,'#e7a07d',INK,1.5);}ctx.restore();}
+}if(selectedSkinId==='crown'){path([[-11,-24],[-11,-35],[-5,-29],[0,-39],[5,-29],[11,-35],[11,-24]],'#e5b735',INK,1.5);ellipse(0,-39,2.5,2.5,'#fff4b2',null);}
+else if(selectedSkinId==='galaxy'){for(let i=0;i<3;i++)ellipse(-8+i*8,-20-(i%2)*5,1.5,1.5,'#fff6c9',null);}
+else if(selectedSkinId==='rainbow'){path([[-10,-25],[0,-29],[10,-25]],'#e65b70',2);path([[-9,-22],[0,-26],[9,-22]],'#e6a53e',2);}
+else if(selectedSkinId==='neon'){path([[-7,-25],[1,-32],[-1,-25],[7,-25]],'#fff77b',2);}
+if(p.shoot>.12)box(-4,-33,8,16,3,'#d0e6a4');else box(p.face>0?9:-22,-9,13,8,4,'#c7e39b');if(p.prop>0){ellipse(0,-26,16,7,'#c8a9d8');path([[0,-29],[0,-38]],INK,2);ellipse(0,-39,22*Math.abs(Math.sin(time*32))+3,3,'#e7a07d',INK,1.5);}ctx.restore();}
 function draw(){ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);if(winterTheme){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#c5e8f8');sky.addColorStop(1,'#d5edf7');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);if(winterBgCache){const bgY=-Math.min(H*.025,Math.max(0,camera*.004));ctx.globalAlpha=.22;ctx.drawImage(winterBgCache,0,bgY,W,H*1.03);ctx.globalAlpha=1;ctx.fillStyle='#eaf7fc20';ctx.fillRect(0,0,W,H);}ctx.fillStyle='#d8efff12';ctx.fillRect(0,0,W,H);}else{ctx.fillStyle='#faf7ed';ctx.fillRect(0,0,W,H);}ctx.lineCap='round';ctx.lineJoin='round';const off=(((-camera*.65)%26)+26)%26;ctx.lineWidth=.7;ctx.strokeStyle=winterTheme?'#d9f1ff18':'#aec8d34a';ctx.beginPath();for(let y=off;y<H;y+=26){ctx.moveTo(0,y);ctx.lineTo(W,y);}for(let x=0;x<W;x+=26){ctx.moveTo(x,0);ctx.lineTo(x,H);}ctx.stroke();path([[35,0],[35,H]],winterTheme?'#d8a7ad55':'#da9c9c70',1.2);path([[39,0],[39,H]],winterTheme?'#d8a7ad25':'#da9c9c35',1);for(let y=off+26;y<H;y+=156)ellipse(16,y,4,4,winterTheme?'#d2e8ef':'#deddd4',null);
 if(winterTheme){ctx.fillStyle='#ffffff';for(const f of snowSeed){const x=(f.x+Math.sin(time*.7+f.phase)*15+W)%W,y=(f.y+time*f.s-camera*.08)%(H+20);ctx.globalAlpha=.24+(f.r*.035);ctx.beginPath();ctx.arc(x,y,f.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.save();const gy=H*.145+((camera*.018)%18);ctx.beginPath();ctx.moveTo(0,gy-3);ctx.quadraticCurveTo(W*.5,gy+34,W,gy-3);ctx.strokeStyle='#263d5740';ctx.lineWidth=1.2;ctx.stroke();for(let gx=14;gx<W;gx+=48){const t=gx/W;const by=gy-3+Math.sin(t*Math.PI)*34;const pulse=.78+.22*Math.sin(time*3+gx);ctx.globalAlpha=pulse;ctx.fillStyle='#fff0bd';ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(gx,by+5,1.8,0,Math.PI*2);ctx.fill();}ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();}
 if(player.invert>0){ctx.fillStyle='#a47bcc10';ctx.fillRect(0,0,W,H);for(let i=0;i<7;i++){const x=57+i*55,y=((time*-80+i*113)%H+H)%H;path([[x-6,y+7],[x,y],[x+6,y+7]],'#986ecb44',2);path([[x,y],[x,y+25]],'#986ecb44',2);}}
@@ -276,6 +286,8 @@ function frame(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
 // Telegram Mini App authentication + Cloudflare Worker.
 const API_BASE=(window.GAME_CONFIG&&window.GAME_CONFIG.apiBase||'').replace(/\/+$/,'');
 const SESSION_KEY='notebook-jump-session-v1';
+const SKIN_CATALOG=[{"id":"mint","name":"М’ятка","price":5,"color":"#9de3c1","accent":"#4b9b79","emoji":"🌿"},{"id":"ocean","name":"Океан","price":5,"color":"#7dc9ed","accent":"#287aa7","emoji":"🌊"},{"id":"sunset","name":"Захід","price":6,"color":"#ffb17e","accent":"#dc6b5c","emoji":"🌅"},{"id":"lavender","name":"Лаванда","price":6,"color":"#c7a9ef","accent":"#8059b4","emoji":"💜"},{"id":"flame","name":"Полум’я","price":7,"color":"#ff8b62","accent":"#b83d32","emoji":"🔥"},{"id":"forest","name":"Лісовик","price":7,"color":"#83bd75","accent":"#426f43","emoji":"🌲"},{"id":"galaxy","name":"Космос","price":8,"color":"#8d8be8","accent":"#47428f","emoji":"🌌"},{"id":"neon","name":"Неон","price":8,"color":"#8ee9e1","accent":"#158c91","emoji":"⚡"},{"id":"rainbow","name":"Веселка","price":10,"color":"#f39cc5","accent":"#a34b93","emoji":"🌈"},{"id":"crown","name":"Королівський","price":50,"color":"#f5d36d","accent":"#a7771d","emoji":"👑","exclusive":true}];
+let ownedSkins=[],selectedSkinId='default',selectedSkin= {color:'#b6df88',accent:'#739b57',id:'default'};
 let gameSession=null;
 try{gameSession=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){}
 function apiHeaders(){return gameSession&&gameSession.token?{'Authorization':'Bearer '+gameSession.token,'Content-Type':'application/json'}:{'Content-Type':'application/json'};}
@@ -310,6 +322,50 @@ async function submitOnlineScore(value){
   $('finalBest').textContent='РЕКОРД '+best+' · збережено в профілі';
  }catch(e){toast('Рекорд не синхронізовано: '+e.message);}
 }
+
+async function loadShop(){
+ show('shopModal',true);$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
+ if(!gameSession?.token){$('shopStatus').textContent='Спочатку відкрий гру через Telegram, щоб увійти.';return;}
+ try{
+  const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
+  ownedSkins=data.owned||[];selectedSkinId=data.selected||'default';applySelectedSkin();
+  $('shopStatus').textContent='Твій скін: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId))+' · 10 скінів у каталозі';
+  renderShop();
+ }catch(e){$('shopStatus').textContent=e.message;}
+}
+function applySelectedSkin(){selectedSkinId=selectedSkinId||'default';selectedSkin=SKIN_CATALOG.find(x=>x.id===selectedSkinId)||{id:'default',color:'#b6df88',accent:'#739b57'};}
+function renderShop(){
+ $('skinGrid').innerHTML='<div class="skinItem"><div class="skinSwatch" style="background:#b6df88">🙂</div><strong>Класичний</strong><small>Безкоштовно</small><button data-skin="default">'+(selectedSkinId==='default'?'Обрано':'Обрати')+'</button></div>'+SKIN_CATALOG.map(s=>{
+ const owned=ownedSkins.includes(s.id),selected=selectedSkinId===s.id;
+ return '<div class="skinItem '+(s.exclusive?'exclusive':'')+'"><div class="skinSwatch" style="background:'+s.color+';box-shadow:inset 0 -7px 0 '+s.accent+'">'+s.emoji+'</div><strong>'+escapeHtml(s.name)+'</strong><small>'+(owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''))+'</small><button data-skin="'+s.id+'">'+(selected?'Обрано':owned?'Обрати':'Купити')+'</button></div>';
+ }).join('');
+ $('skinGrid').querySelectorAll('button[data-skin]').forEach(b=>b.onclick=()=>chooseSkin(b.dataset.skin));
+}
+async function chooseSkin(id){
+ if(id!=='default'&&!ownedSkins.includes(id)){
+  const skin=SKIN_CATALOG.find(x=>x.id===id);if(!skin)return;
+  try{
+   $('shopStatus').textContent='Створюємо рахунок на '+skin.price+' ⭐…';
+   const res=await fetch(API_BASE+'/api/shop/buy',{method:'POST',headers:apiHeaders(),body:JSON.stringify({skinId:id})}),data=await res.json();
+   if(!res.ok)throw new Error(data.error||'Не вдалося створити оплату');
+   const tg=window.Telegram?.WebApp;if(!tg?.openInvoice)throw new Error('Відкрий гру саме як Telegram Mini App, щоб оплатити Stars.');
+   tg.openInvoice(data.invoiceUrl,async status=>{
+    if(status==='paid'){
+      $('shopStatus').textContent='Оплату прийнято. Зараховуємо скін…';
+      for(let i=0;i<8;i++){await new Promise(r=>setTimeout(r,900));const check=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}).then(r=>r.json());if(check.owned?.includes(id)){ownedSkins=check.owned;selectedSkinId=id;await fetch(API_BASE+'/api/shop/select',{method:'POST',headers:apiHeaders(),body:JSON.stringify({skinId:id})});applySelectedSkin();renderShop();$('shopStatus').textContent='Скін придбано й обрано! ✨';return;}}
+      $('shopStatus').textContent='Оплату отримано. Скін з’явиться за мить — відкрий магазин ще раз.';
+    }else if(status==='cancelled')$('shopStatus').textContent='Оплату скасовано.';
+    else $('shopStatus').textContent='Статус оплати: '+status+'. Якщо списало Stars, зачекай підтвердження.';
+   });
+  }catch(e){$('shopStatus').textContent=e.message;}
+  return;
+ }
+ try{
+  const res=await fetch(API_BASE+'/api/shop/select',{method:'POST',headers:apiHeaders(),body:JSON.stringify({skinId:id})}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося обрати скін');
+  selectedSkinId=id;applySelectedSkin();$('shopStatus').textContent='Скін обрано!';renderShop();
+ }catch(e){$('shopStatus').textContent=e.message;}
+}
+
 async function showLeaderboard(){
  show('leaderboardModal',true);$('leaderboardStatus').textContent='Завантаження таблиці…';$('leaderboardRows').innerHTML='';
  try{
@@ -345,7 +401,7 @@ async function changeRole(id,role){
   await showAdminPanel();toast('Роль гравця оновлено');
  }catch(e){toast(e.message);}
 }
-$('leaderboardBtn').onclick=showLeaderboard;$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
+$('leaderboardBtn').onclick=showLeaderboard;$('shopBtn').onclick=loadShop;$('closeShop').onclick=()=>show('shopModal',false);$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
 $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('adminModal',false);
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
 setAccountUI();authenticateMiniApp();
