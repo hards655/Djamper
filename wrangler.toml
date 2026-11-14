@@ -1,11 +1,11 @@
-name = "notebook-jumper-api"
+name = "djamper"
 main = "worker.js"
 compatibility_date = "2026-11-14"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "notebook-jumper"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "1da2c9aa-3e19-46fb-8c3e-bc4fbc0fe2f1"
 
 [vars]
-ALLOWED_ORIGINS = "https://YOUR-USERNAME.github.io"
+ALLOWED_ORIGINS = "https://hards655.github.io"
