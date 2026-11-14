@@ -237,7 +237,31 @@ function drawSkinEffects(){
   ctx.restore();
 }
 function drawPlayer(offset=0){const p=player;ctx.save();ctx.translate(p.x+offset,p.y-camera);if(p.invuln>0&&Math.floor(time*15)%2)ctx.globalAlpha=.5;if(p.shield>0){ellipse(0,0,29+Math.sin(time*7),34,'#a6dcf426','#59b0d5',2);ellipse(-13,-18,4,7,'#ffffffa0',null);}if(p.low>0){ctx.setLineDash([3,6]);ellipse(0,0,35,40,'#ffffff00','#6ab8c380',1);ctx.setLineDash([]);}if(p.invert>0)ctx.rotate(Math.PI);else ctx.rotate(p.vx*.00025);const squash=p.squash/.2;ctx.scale(1+squash*.2,1-squash*.18);drawSkinEffects();if(p.jet>0){box(-23,-4,11,28,4,'#d9dde0');box(12,-4,11,28,4,'#d9dde0');for(const x of [-18,18]){ctx.beginPath();ctx.moveTo(x-5,23);ctx.lineTo(x,40+Math.sin(time*48)*9);ctx.lineTo(x+5,23);ctx.fillStyle='#ee9c49';ctx.fill();}}
-path([[-10,15],[-11,23],[-19,23]],INK,3);path([[10,15],[11,23],[19,23]],INK,3);ctx.beginPath();ctx.moveTo(-16,13);ctx.bezierCurveTo(-20,-24,-6,-27,5,-24);ctx.bezierCurveTo(19,-22,20,-2,16,14);ctx.quadraticCurveTo(0,20,-16,13);if(selectedSkinId==='creator'){ctx.save();ctx.clip();ctx.fillStyle='#1688e8';ctx.fillRect(-20,-30,40,26);ctx.fillStyle='#ffd52a';ctx.fillRect(-20,-4,40,26);ctx.restore();}else{ctx.fillStyle=p.invert>0?'#c3a3ed':selectedSkin.color;ctx.fill();}ctx.lineWidth=2.4;ctx.strokeStyle=INK;ctx.stroke();path([[-13,7],[12,7]],selectedSkin.accent,1);path([[-12,11],[13,11]],selectedSkin.accent,1);ellipse(-6,-12,4,6,'#fff',INK,1.5);ellipse(6,-12,4,6,'#fff',INK,1.5);ellipse(-6+p.face*1.4,-11,1.7,2.5,INK,null);ellipse(6+p.face*1.4,-11,1.7,2.5,INK,null);if(winterTheme){
+path([[-10,15],[-11,23],[-19,23]],INK,3);path([[10,15],[11,23],[19,23]],INK,3);ctx.beginPath();ctx.moveTo(-16,13);ctx.bezierCurveTo(-20,-24,-6,-27,5,-24);ctx.bezierCurveTo(19,-22,20,-2,16,14);ctx.quadraticCurveTo(0,20,-16,13);ctx.save();ctx.clip();
+if(selectedSkinId==='creator'){
+  // Прапор залишається чітким, а поверх нього додається м'яке об'ємне освітлення.
+  ctx.fillStyle='#1688e8';ctx.fillRect(-20,-30,40,26);
+  ctx.fillStyle='#ffd52a';ctx.fillRect(-20,-4,40,26);
+}else{
+  const base=p.invert>0?'#c3a3ed':selectedSkin.color;
+  const bodyGrad=ctx.createLinearGradient(-16,-27,17,19);
+  bodyGrad.addColorStop(0,'#ffffff');bodyGrad.addColorStop(.16,base);
+  bodyGrad.addColorStop(.58,base);bodyGrad.addColorStop(1,'#202638');
+  ctx.fillStyle=bodyGrad;ctx.fill();
+}
+// Блік, м'яка тінь і скляний відблиск — без дорогих blur-фільтрів.
+const shade=ctx.createLinearGradient(0,-25,0,19);
+shade.addColorStop(0,'#ffffff00');shade.addColorStop(.62,'#10182708');shade.addColorStop(1,'#10182766');
+ctx.fillStyle=shade;ctx.fillRect(-22,-30,44,54);
+const shine=ctx.createRadialGradient(-8,-19,1,-7,-18,17);
+shine.addColorStop(0,'#ffffffa8');shine.addColorStop(.42,'#ffffff38');shine.addColorStop(1,'#ffffff00');
+ctx.fillStyle=shine;ctx.fillRect(-24,-35,34,34);
+ctx.globalAlpha=.34;ctx.strokeStyle='#ffffff';ctx.lineWidth=1.4;
+ctx.beginPath();ctx.ellipse(-5,-15,8,13,-.25,Math.PI*1.05,Math.PI*1.85);ctx.stroke();
+ctx.restore();ctx.lineWidth=2.4;ctx.strokeStyle=INK;ctx.stroke();
+ // Тонкий внутрішній контур додає відчуття товщини та відполірованого 3D-матеріалу.
+ ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle='#ffffff';ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(-13,8);ctx.bezierCurveTo(-18,-13,-10,-25,1,-25);ctx.stroke();ctx.restore();path([[-13,7],[12,7]],selectedSkin.accent,1);path([[-12,11],[13,11]],selectedSkin.accent,1);ellipse(-6,-12,4,6,'#fff',INK,1.5);ellipse(6,-12,4,6,'#fff',INK,1.5);ellipse(-6+p.face*1.4,-11,1.7,2.5,INK,null);ellipse(6+p.face*1.4,-11,1.7,2.5,INK,null);if(winterTheme){
 /* Об'ємна новорічна шапка: тканина, складки та пухнаста опушка */
 ctx.save();
 const hat=ctx.createLinearGradient(-10,-45,12,-17);
