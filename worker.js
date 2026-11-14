@@ -40,7 +40,7 @@ async function verifyTelegram(env, initData){
   }catch{return null;}
 }
 
-const SKINS=[{"id":"mint","name":"М’ятка","price":5},{"id":"ocean","name":"Океан","price":5},{"id":"sunset","name":"Захід","price":6},{"id":"lavender","name":"Лаванда","price":6},{"id":"flame","name":"Полум’я","price":7},{"id":"forest","name":"Лісовик","price":7},{"id":"galaxy","name":"Космос","price":8},{"id":"neon","name":"Неон","price":8},{"id":"rainbow","name":"Веселка","price":10},{"id":"crown","name":"Королівський","price":50},{"id":"admin","name":"Адмінський","price":2000},{"id":"creator","name":"Скін творця","price":10000}];
+const SKINS=[{"id":"mint","name":"М’ятка","price":5},{"id":"ocean","name":"Океан","price":5},{"id":"sunset","name":"Захід","price":6},{"id":"lavender","name":"Лаванда","price":6},{"id":"flame","name":"Полум’я","price":7},{"id":"forest","name":"Лісовик","price":7},{"id":"galaxy","name":"Космос","price":8},{"id":"neon","name":"Неон","price":8},{"id":"rainbow","name":"Веселка","price":10},{"id":"crown","name":"Королівський","price":50},{"id":"admin","name":"Адмінський","price":2000},{"id":"creator","name":"Скін творця","price":10000},{"id":"glass","name":"Кристал","price":25}];
 async function ensureShopTables(env){
  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_skins (telegram_id TEXT NOT NULL, skin_id TEXT NOT NULL, purchased_at TEXT DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (telegram_id,skin_id))").run();
  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_skin_selection (telegram_id TEXT PRIMARY KEY, skin_id TEXT NOT NULL DEFAULT 'default', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
