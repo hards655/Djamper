@@ -215,7 +215,7 @@ function drawEnemy(e){const y=e.y-camera;if(y<-70||y>H+80)return;ctx.save();ctx.
 function drawSkinEffects(){
   const t=time,pulse=.65+.35*Math.sin(t*4);ctx.save();
   // Легкий shader-like glow: один radial gradient, без shadowBlur та важких частинок.
-  const glowColors={mint:'#8ed9a8',ocean:'#62d8ff',sunset:'#ff9b62',lavender:'#c9a0ff',flame:'#ff7045',forest:'#83bd75',galaxy:'#9a8cff',neon:'#53fff1',rainbow:'#ff8bd0',crown:'#ffd86a',admin:'#e34d5d',creator:'#398fff',glass:'#9beeff'};
+  const glowColors={mint:'#8ed9a8',ocean:'#62d8ff',sunset:'#ff9b62',lavender:'#c9a0ff',flame:'#ff7045',forest:'#83bd75',galaxy:'#9a8cff',neon:'#53fff1',rainbow:'#ff8bd0',crown:'#ffd86a',admin:'#e34d5d',creator:'#398fff',glass:'#9beeff',robot:'#74dfff',ninja:'#9b9fff',alien:'#aaff82',pirate:'#e9a35e',knight:'#c4ddf5',panda:'#ffffff',fox:'#ff9b50',astronaut:'#83dfff',slime:'#71ffd0',dragon:'#8ff28d',skeleton:'#e8e2cf',santa:'#ff6868',saint:'#f5d36d',kapitoshka:'#6edfff',lich:'#9bffd0'};
   const glow=glowColors[selectedSkinId];
   if(glow){
     const halo=ctx.createRadialGradient(0,-5,8,0,-5,37);
