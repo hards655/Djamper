@@ -102,7 +102,9 @@ export default {
     const actor=await env.DB.prepare('SELECT telegram_id,username,first_name,last_name FROM players WHERE telegram_id=?').bind(String(telegramId)).first();
     if(!actor) return json({error:'Профіль гравця не знайдено'},401,origin);
     const role=url.searchParams.get('role')||'client';
+    const requestedMode=url.searchParams.get('mode')||'auto';
     if(!['host','client'].includes(role)) return json({error:'Некоректна роль кімнати'},400,origin);
+    if(role==='host'&&!['p2p','server'].includes(requestedMode)) return json({error:'Некоректний режим кімнати'},400,origin);
     const name=[actor.first_name,actor.last_name].filter(Boolean).join(' ')||actor.username||'Гравець';
     const id=env.ROOMS.idFromName(roomMatch[1]);
     const stub=env.ROOMS.get(id);
@@ -224,6 +226,7 @@ export class MultiplayerRoom {
  async fetch(request){
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket') return new Response('WebSocket required',{status:426});
   const url=new URL(request.url),peer=url.searchParams.get('peer')||'',role=url.searchParams.get('role')||'client';
+  const requestedMode=url.searchParams.get('mode')||'auto';
   const name=(url.searchParams.get('name')||'Гравець').slice(0,48);
   if(!/^[0-9a-f-]{36}$/i.test(peer)||!['host','client'].includes(role)) return new Response('Bad request',{status:400});
   const sockets=this.ctx.getWebSockets();
@@ -233,11 +236,13 @@ export class MultiplayerRoom {
   if(role==='host' && host) return new Response('Room already has a host',{status:409});
   if(role==='client' && !host) return new Response('Host is not connected',{status:404});
   if(members.length>=5) return new Response('Room is full',{status:409});
+  const mode=role==='host'?requestedMode:host.mode;
+  if(!['p2p','server'].includes(mode)) return new Response('Invalid room mode',{status:400});
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];
-  server.serializeAttachment({peer,role,name});
+  server.serializeAttachment({peer,role,name,mode,state:null});
   this.ctx.acceptWebSocket(server);
   const current=[...members,{peer,role,name}];
-  this.send(server,{type:'welcome',self:peer,role,players:current.map(({peer,role,name})=>({peer,role,name}))});
+  this.send(server,{type:'welcome',self:peer,role,mode,players:current.map(({peer,role,name})=>({peer,role,name}))});
   this.broadcast({type:'player-joined',player:{peer,role,name}},server);
   return new Response(null,{status:101,webSocket:client});
  }
@@ -247,7 +252,11 @@ export class MultiplayerRoom {
   if(typeof raw!=='string'||raw.length>20000){try{ws.close(1009,'Message too large');}catch{}return;}
   let msg;try{msg=JSON.parse(raw);}catch{return;}
   const sender=ws.deserializeAttachment();if(!sender)return;
-  if(msg.type!=='signal'||!['offer','answer','ice'].includes(msg.signalType))return;
+  if(msg.type==='state'&&sender.mode==='server'){
+   if(!msg.state||typeof msg.state!=='object'||JSON.stringify(msg.state).length>3000)return;
+   this.broadcast({type:'player-state',peer:sender.peer,state:msg.state},ws);return;
+  }
+  if(msg.type!=='signal'||sender.mode!=='p2p'||!['offer','answer','ice'].includes(msg.signalType))return;
   if(msg.data==null||JSON.stringify(msg.data).length>16000)return;
   const target=String(msg.to||'');
   const recipient=this.ctx.getWebSockets().find(other=>{
