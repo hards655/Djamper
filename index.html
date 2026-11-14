@@ -703,7 +703,7 @@ $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('admi
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
 
 /* Lightweight WebRTC star-room: Cloudflare is used for signaling only. */
-let mpSocket=null,mpRoom='',mpRole='',mpPeerId='',mpHostId='',mpConnections=new Map(),mpChannels=new Map(),mpStates=new Map(),mpLastSend=0;
+let mpSocket=null,mpRoom='',mpRole='',mpPeerId='',mpHostId='',mpConnections=new Map(),mpChannels=new Map(),mpStates=new Map(),mpPendingIce=new Map(),mpLastSend=0;
 const MP_SKINS=Object.fromEntries(SKIN_CATALOG.map(s=>[s.id,s]));
 function mpStatus(message){$('mpStatus').textContent=message;}
 function mpCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;}
@@ -747,13 +747,16 @@ async function mpHostOffer(peer){
  try{const pc=mpCreatePeer(peer,true),offer=await pc.createOffer();await pc.setLocalDescription(offer);mpSignal(peer,'offer',pc.localDescription);}
  catch(e){mpStatus('Помилка створення з’єднання: '+e.message);}
 }
+async function mpFlushIce(peer,pc){const list=mpPendingIce.get(String(peer))||[];mpPendingIce.delete(String(peer));for(const candidate of list)try{await pc.addIceCandidate(candidate);}catch(e){}}
 async function mpOnSignal(from,signalType,data){
  try{
-  if(mpRole==='host'&&signalType==='answer'){const pc=mpConnections.get(String(from));if(pc)await pc.setRemoteDescription(data);}
+  if(mpRole==='host'&&signalType==='answer'){const pc=mpConnections.get(String(from));if(pc){await pc.setRemoteDescription(data);await mpFlushIce(from,pc);}}
   else if(mpRole==='client'&&signalType==='offer'){
-   mpHostId=String(from);const pc=mpCreatePeer(from,false);await pc.setRemoteDescription(data);
+   mpHostId=String(from);const pc=mpCreatePeer(from,false);await pc.setRemoteDescription(data);await mpFlushIce(from,pc);
    const answer=await pc.createAnswer();await pc.setLocalDescription(answer);mpSignal(from,'answer',pc.localDescription);
-  }else if(signalType==='ice'){const pc=mpConnections.get(String(from));if(pc&&data)await pc.addIceCandidate(data);}
+  }else if(signalType==='ice'){
+   const pc=mpConnections.get(String(from));if(pc&&data){if(pc.remoteDescription)await pc.addIceCandidate(data);else{const list=mpPendingIce.get(String(from))||[];list.push(data);mpPendingIce.set(String(from),list);}}
+  }
  }catch(e){mpStatus('Помилка WebRTC: '+e.message);}
 }
 function mpConnect(code,role){
@@ -784,7 +787,7 @@ function mpConnect(code,role){
 function mpDisconnect(update=true){
  if(mpSocket){const s=mpSocket;mpSocket=null;try{s.close(1000,'left room');}catch(e){}}
  for(const pc of mpConnections.values())try{pc.close();}catch(e){}
- mpConnections.clear();mpChannels.clear();mpStates.clear();mpRoom='';mpRole='';mpHostId='';
+ mpConnections.clear();mpChannels.clear();mpStates.clear();mpPendingIce.clear();mpRoom='';mpRole='';mpHostId='';
  $('mpRoomInfo').classList.add('hidden');if(update)mpStatus('Ти вийшов із кімнати.');
 }
 function mpBroadcast(){
