@@ -9,3 +9,11 @@ database_id = "1da2c9aa-3e19-46fb-8c3e-bc4fbc0fe2f1"
 
 [vars]
 ALLOWED_ORIGINS = "https://hards655.github.io"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "MultiplayerRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MultiplayerRoom"]
