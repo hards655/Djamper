@@ -107,7 +107,8 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
 .skinItem strong{display:block;font-size:16px}.skinItem small{display:block;font-size:13px;opacity:.75;margin:2px 0 6px}.skinItem button{width:100%;padding:6px 4px;font-size:14px}
 .skinItem.exclusive{border-color:#b88a27;background:#fff6d9}.shopNote{font-size:13px;opacity:.72;line-height:1.35}
 </style></head><body><main id="app"><canvas id="game" aria-label="Нахил або дотики ліворуч і праворуч — рух, угорі — постріл"></canvas><div id="hud" class="hidden"><div><div id="score">0</div><div id="best">РЕКОРД 0</div></div><div class="buttons"><button id="sound" aria-label="Увімкнути або вимкнути звук">♪</button><button id="pause" aria-label="Пауза">Ⅱ</button></div></div><div id="effects"></div><div id="hint" class="hidden">← ДОТИК / НАХИЛ → · УГОРІ — ПОСТРІЛ</div><div id="toast" class="hidden" role="status"></div>
-<section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button><button id="shopBtn" class="small wide">🎨 Магазин скінів</button></div><button id="start" class="primary wide">Почати ↑</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
+<section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button><button id="shopBtn" class="small wide">🎨 Магазин скінів</button></div><button id="start" class="primary wide">Почати ↑</button><button id="mpBtn" class="wide">👥 Грати разом · до 5 гравців</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
+<section id="mpModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">РАЗОМ В ОДНОМУ НЕБІ</div><h2>👥 Мультиплеєр</h2><p class="footnote">Кожен грає у своєму світі, але бачить висоту та рух інших гравців. До 5 учасників.</p><button id="mpCreate" class="primary wide">Створити кімнату</button><div class="row"><input id="mpCodeInput" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="КОД КІМНАТИ" style="min-width:0;width:100%;text-align:center;text-transform:uppercase;font:700 20px Kalam,cursive;border:2px dashed #78966d;border-radius:8px;background:#fffdf6;color:#294b3a"><button id="mpJoin" class="small">Увійти</button></div><div id="mpStatus" class="footnote">Для гри разом увійди через Telegram.</div><div id="mpRoomInfo" class="hidden"><div style="font-size:14px;margin-top:8px">КОД ДЛЯ ДРУЗІВ</div><div id="mpRoomCode" style="font-size:34px;font-weight:900;letter-spacing:5px"></div><div id="mpPlayers" class="footnote"></div><button id="mpCopy" class="small wide">Скопіювати код</button><button id="mpLeave" class="small wide">Вийти з кімнати</button></div><button id="mpClose" class="wide">Назад</button></div></section>
 <section id="instructionModal" class="overlay hidden" aria-modal="true" role="dialog" aria-labelledby="instructionTitle"><div class="card"><div class="eyebrow">ПРАВИЛА ГРИ</div><h2 id="instructionTitle">Інструкція</h2><div class="instructions"><div class="sectionTitle">КЕРУВАННЯ</div><b>← →</b> Утримуйте ліву / праву половину екрана або нахиляйте телефон.<br><b>↑</b> Торкніться верхньої чверті екрана, щоб стріляти.<br><b>↻</b> Стрибки автоматичні. Краї екрана з’єднані.<br><b>Комп’ютер:</b> A/D або стрілки — рух, пробіл — постріл, P / Esc — пауза.
 <div class="sectionTitle">ПЛАТФОРМИ</div><div class="legend">Зелені — звичайні; сині — рухомі; коричневі — ламаються; пунктирні — зникають після стрибка; червоні — вибухають через 2 секунди після дотику.</div>
 <div class="sectionTitle">ОСОБЛИВІ ПЛАТФОРМИ</div><div class="legend"><b>Фіолетові ↕</b> перевертають напрямок гравітації на 10 секунд: відштовхуйтеся від платформ знизу! Блакитні L — низька гравітація на 10 секунд. Рожеві T — телепорт угору. Оминайте шипи!</div>
@@ -555,7 +556,7 @@ if(p.shoot>.12)box(-4,-33,8,16,3,'#d0e6a4');else box(p.face>0?9:-22,-9,13,8,4,'#
 function draw(){ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);if(winterTheme){if(!skyGradient||skyGradientH!==H){skyGradient=ctx.createLinearGradient(0,0,0,H);skyGradient.addColorStop(0,'#c5e8f8');skyGradient.addColorStop(1,'#d5edf7');skyGradientH=H;}ctx.fillStyle=skyGradient;ctx.fillRect(0,0,W,H);if(winterBgCache){const bgY=-Math.min(H*.025,Math.max(0,camera*.004));ctx.globalAlpha=.22;ctx.drawImage(winterBgCache,0,bgY,W,H*1.03);ctx.globalAlpha=1;ctx.fillStyle='#eaf7fc20';ctx.fillRect(0,0,W,H);}ctx.fillStyle='#d8efff12';ctx.fillRect(0,0,W,H);}else{ctx.fillStyle='#faf7ed';ctx.fillRect(0,0,W,H);}ctx.lineCap='round';ctx.lineJoin='round';const off=(((-camera*.65)%26)+26)%26;ctx.lineWidth=.7;ctx.strokeStyle=winterTheme?'#d9f1ff18':'#aec8d34a';ctx.beginPath();for(let y=off;y<H;y+=26){ctx.moveTo(0,y);ctx.lineTo(W,y);}for(let x=0;x<W;x+=26){ctx.moveTo(x,0);ctx.lineTo(x,H);}ctx.stroke();path([[35,0],[35,H]],winterTheme?'#d8a7ad55':'#da9c9c70',1.2);path([[39,0],[39,H]],winterTheme?'#d8a7ad25':'#da9c9c35',1);for(let y=off+26;y<H;y+=156)ellipse(16,y,4,4,winterTheme?'#d2e8ef':'#deddd4',null);
 if(winterTheme){ctx.fillStyle='#ffffff';for(const f of snowSeed){const x=(f.x+Math.sin(time*.7+f.phase)*15+W)%W,y=(f.y+time*f.s-camera*.08)%(H+20);ctx.globalAlpha=.24+(f.r*.035);ctx.beginPath();ctx.arc(x,y,f.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.save();const gy=H*.145+((camera*.018)%18);ctx.beginPath();ctx.moveTo(0,gy-3);ctx.quadraticCurveTo(W*.5,gy+34,W,gy-3);ctx.strokeStyle='#263d5740';ctx.lineWidth=1.2;ctx.stroke();for(let gx=14;gx<W;gx+=48){const t=gx/W;const by=gy-3+Math.sin(t*Math.PI)*34;const pulse=.78+.22*Math.sin(time*3+gx);ctx.globalAlpha=pulse;ctx.fillStyle='#fff0bd';ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(gx,by+5,1.8,0,Math.PI*2);ctx.fill();}ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();}
 if(player.invert>0){ctx.fillStyle='#a47bcc10';ctx.fillRect(0,0,W,H);for(let i=0;i<7;i++){const x=57+i*55,y=((time*-80+i*113)%H+H)%H;path([[x-6,y+7],[x,y],[x+6,y+7]],'#986ecb44',2);path([[x,y],[x,y+25]],'#986ecb44',2);}}
-ctx.save();if(shake>0)ctx.translate(rand(-1,1)*shake*16,rand(-1,1)*shake*16);const mark=Math.floor(-camera/1000);text('сторінка '+Math.max(1,mark+1),W-16,H-28,10,'#82919c55','right');for(const q of platforms)drawPlatform(q);for(const e of enemies)drawEnemy(e);for(const b of bullets){const by=b.y-camera;if(by>-14&&by<H+14){path([[b.x,by+11],[b.x,by]],'#d29f39',3);ellipse(b.x,by,3,5,'#ffe09a',INK,1);}}for(const v of particles){const py=v.y-camera;if(py>-8&&py<H+8&&v.x>-8&&v.x<W+8){ctx.globalAlpha=clamp(v.life/.5,0,1);ctx.fillStyle=v.color;ctx.fillRect(v.x,py,v.size,v.size);}}ctx.globalAlpha=1;drawPlayer();if(player.x<25)drawPlayer(W);if(player.x>W-25)drawPlayer(-W);for(const t of texts){const ty=t.y-camera;if(ty>-24&&ty<H+24){ctx.globalAlpha=Math.min(1,t.life*2);text(t.text,clamp(t.x,110,W-110),ty,12,t.color);}}ctx.globalAlpha=1;ctx.restore();if(flash>0){ctx.globalAlpha=flash;ctx.fillStyle=flashColor;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
+ctx.save();if(shake>0)ctx.translate(rand(-1,1)*shake*16,rand(-1,1)*shake*16);const mark=Math.floor(-camera/1000);text('сторінка '+Math.max(1,mark+1),W-16,H-28,10,'#82919c55','right');for(const q of platforms)drawPlatform(q);for(const e of enemies)drawEnemy(e);for(const b of bullets){const by=b.y-camera;if(by>-14&&by<H+14){path([[b.x,by+11],[b.x,by]],'#d29f39',3);ellipse(b.x,by,3,5,'#ffe09a',INK,1);}}for(const v of particles){const py=v.y-camera;if(py>-8&&py<H+8&&v.x>-8&&v.x<W+8){ctx.globalAlpha=clamp(v.life/.5,0,1);ctx.fillStyle=v.color;ctx.fillRect(v.x,py,v.size,v.size);}}ctx.globalAlpha=1;drawPlayer();if(player.x<25)drawPlayer(W);if(player.x>W-25)drawPlayer(-W);drawMultiplayerGhosts();for(const t of texts){const ty=t.y-camera;if(ty>-24&&ty<H+24){ctx.globalAlpha=Math.min(1,t.life*2);text(t.text,clamp(t.x,110,W-110),ty,12,t.color);}}ctx.globalAlpha=1;ctx.restore();if(flash>0){ctx.globalAlpha=flash;ctx.fillStyle=flashColor;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
 
 function orientation(e){if(!tiltEnabled||e.gamma==null||e.beta==null)return;const a=(screen.orientation&&screen.orientation.angle)||window.orientation||0;let value=e.gamma;if(a===90)value=e.beta;if(a===270||a===-90)value=-e.beta;if(a===180)value=-e.gamma;tiltRaw=value;if(tiltNeutral===null){tiltNeutral=value;toast('Нахил увімкнено. Поточне положення — центр.');}tiltReady=true;const v=clamp((value-tiltNeutral)/23,-1,1);tiltValue=Math.abs(v)<.07?0:v;$('tilt').textContent='Нахил: увімкнено';}
 window.addEventListener('deviceorientation',orientation,{passive:true});
@@ -700,6 +701,123 @@ async function changeRole(id,role){
 $('leaderboardBtn').onclick=showLeaderboard;$('shopBtn').onclick=loadShop;$('closeShop').onclick=()=>show('shopModal',false);$('paymentSetupBtn').onclick=async()=>{try{$('shopStatus').textContent='Підключаємо Telegram webhook…';const res=await fetch(API_BASE+'/api/admin/payments/setup',{method:'POST',headers:apiHeaders(),body:'{}'}),data=await res.json();if(!res.ok)throw new Error(data.error||'Помилка налаштування');$('shopStatus').textContent='Оплату Telegram Stars підключено! ⭐';}catch(e){$('shopStatus').textContent=e.message;}};$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
 $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('adminModal',false);
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
+
+/* Lightweight WebRTC star-room: Cloudflare is used for signaling only. */
+let mpSocket=null,mpRoom='',mpRole='',mpPeerId='',mpHostId='',mpConnections=new Map(),mpChannels=new Map(),mpStates=new Map(),mpLastSend=0;
+const MP_SKINS=Object.fromEntries(SKIN_CATALOG.map(s=>[s.id,s]));
+function mpStatus(message){$('mpStatus').textContent=message;}
+function mpCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;}
+function mpRenderPlayers(){
+ const names=[];
+ if(mpRole==='host'&&gameSession?.user){const u=gameSession.user;names.push('⭐ '+([u.first_name,u.last_name].filter(Boolean).join(' ')||u.username||'Ти'));}
+ for(const [id,state] of mpStates){names.push((state.name||'Гравець')+' · '+(state.score||0));}
+ if(mpSocket&&mpSocket.readyState===WebSocket.OPEN&&mpRole==='client')names.unshift('👑 Хост');
+ $('mpPlayers').textContent=names.length?names.join('  •  '):'Очікуємо гравців…';
+}
+function mpSignal(to,signalType,data){if(mpSocket?.readyState===WebSocket.OPEN)mpSocket.send(JSON.stringify({type:'signal',to:String(to),signalType,data}));}
+function mpSend(channel,payload){if(channel?.readyState==='open')try{channel.send(JSON.stringify(payload));}catch(e){}}
+function mpMakeState(){
+ const u=gameSession?.user||{},name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.username||'Гравець';
+ return {name,score,skinId:selectedSkinId,x:Math.max(0,Math.min(1,player.x/W)),height:Math.round((baseY-player.y)/10),playing:mode==='playing'};
+}
+function mpHandleData(from,raw){
+ let msg;try{msg=JSON.parse(raw);}catch(e){return;}
+ if(msg.kind==='state'&&msg.state){
+  mpStates.set(String(from),msg.state);
+  if(mpRole==='host')for(const [id,ch] of mpChannels)if(id!==String(from))mpSend(ch,{kind:'remote-state',peer:String(from),state:msg.state});
+  mpRenderPlayers();
+ }else if(msg.kind==='remote-state'&&msg.state){mpStates.set(String(msg.peer),msg.state);mpRenderPlayers();}
+}
+function mpSetupChannel(peer,channel){
+ mpChannels.set(String(peer),channel);
+ channel.onmessage=e=>mpHandleData(String(peer),e.data);
+ channel.onopen=()=>{mpStatus('З’єднано! Гравців у кімнаті: до 5.');mpRenderPlayers();};
+ channel.onclose=()=>{mpChannels.delete(String(peer));mpStates.delete(String(peer));mpRenderPlayers();};
+}
+function mpCreatePeer(peer,isHost){
+ if(mpConnections.has(String(peer)))return mpConnections.get(String(peer));
+ const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+ mpConnections.set(String(peer),pc);pc.onicecandidate=e=>{if(e.candidate)mpSignal(peer,'ice',e.candidate.toJSON());};
+ pc.onconnectionstatechange=()=>{if(pc.connectionState==='failed')mpStatus('Не вдалося встановити пряме з’єднання. Спробуйте іншу мережу.');};
+ if(isHost)mpSetupChannel(peer,pc.createDataChannel('game',{ordered:false,maxRetransmits:0}));
+ else pc.ondatachannel=e=>mpSetupChannel(peer,e.channel);
+ return pc;
+}
+async function mpHostOffer(peer){
+ try{const pc=mpCreatePeer(peer,true),offer=await pc.createOffer();await pc.setLocalDescription(offer);mpSignal(peer,'offer',pc.localDescription);}
+ catch(e){mpStatus('Помилка створення з’єднання: '+e.message);}
+}
+async function mpOnSignal(from,signalType,data){
+ try{
+  if(mpRole==='host'&&signalType==='answer'){const pc=mpConnections.get(String(from));if(pc)await pc.setRemoteDescription(data);}
+  else if(mpRole==='client'&&signalType==='offer'){
+   mpHostId=String(from);const pc=mpCreatePeer(from,false);await pc.setRemoteDescription(data);
+   const answer=await pc.createAnswer();await pc.setLocalDescription(answer);mpSignal(from,'answer',pc.localDescription);
+  }else if(signalType==='ice'){const pc=mpConnections.get(String(from));if(pc&&data)await pc.addIceCandidate(data);}
+ }catch(e){mpStatus('Помилка WebRTC: '+e.message);}
+}
+function mpConnect(code,role){
+ if(!gameSession?.token){mpStatus('Спочатку відкрий гру через Telegram та увійди в профіль.');return;}
+ if(!window.RTCPeerConnection||!window.WebSocket){mpStatus('Цей браузер не підтримує WebRTC.');return;}
+ mpDisconnect(false);mpRoom=code;mpRole=role;
+ const scheme=API_BASE.startsWith('https:')?'wss:':'ws:';
+ const wsUrl=scheme+'//'+new URL(API_BASE).host+'/api/mp/signal/'+code+'?role='+role+'&token='+encodeURIComponent(gameSession.token);
+ mpStatus(role==='host'?'Створюємо кімнату…':'Підключаємося до кімнати…');
+ mpSocket=new WebSocket(wsUrl);
+ mpSocket.onopen=()=>mpStatus('Сигнальний канал готовий. '+(role==='host'?'Запроси друзів за кодом.':'Очікуємо відповідь хоста…'));
+ mpSocket.onmessage=async event=>{
+  let msg;try{msg=JSON.parse(event.data);}catch(e){return;}
+  if(msg.type==='welcome'){
+   mpPeerId=String(msg.self);mpHostId=String(msg.players.find(p=>p.role==='host')?.peer||'');
+   $('mpRoomCode').textContent=code;$('mpRoomInfo').classList.remove('hidden');
+   mpStatus(role==='host'?'Кімната створена. Надішли код друзям!':'У кімнаті. Встановлюємо пряме з’єднання…');mpRenderPlayers();
+  }else if(msg.type==='player-joined'){
+   if(role==='host'&&msg.player?.peer)await mpHostOffer(String(msg.player.peer));
+   mpStatus('Приєднався: '+(msg.player?.name||'гравець'));mpRenderPlayers();
+  }else if(msg.type==='player-left'){
+   const id=String(msg.peer);mpConnections.get(id)?.close();mpConnections.delete(id);mpChannels.delete(id);mpStates.delete(id);mpRenderPlayers();
+  }else if(msg.type==='signal')await mpOnSignal(String(msg.from),msg.signalType,msg.data);
+ };
+ mpSocket.onerror=()=>mpStatus('Помилка сигналінгу. Перевір Worker та спробуй ще раз.');
+ mpSocket.onclose=event=>{if(mpRoom)mpStatus(event.code===1000?'З’єднання з кімнатою закрито.':'Зв’язок із кімнатою перервано.');mpSocket=null;};
+}
+function mpDisconnect(update=true){
+ if(mpSocket){const s=mpSocket;mpSocket=null;try{s.close(1000,'left room');}catch(e){}}
+ for(const pc of mpConnections.values())try{pc.close();}catch(e){}
+ mpConnections.clear();mpChannels.clear();mpStates.clear();mpRoom='';mpRole='';mpHostId='';
+ $('mpRoomInfo').classList.add('hidden');if(update)mpStatus('Ти вийшов із кімнати.');
+}
+function mpBroadcast(){
+ if(!mpRoom||!mpSocket||mpSocket.readyState!==WebSocket.OPEN||mode==='menu')return;
+ const state=mpMakeState();
+ if(mpRole==='host')for(const [id,ch] of mpChannels)mpSend(ch,{kind:'state',peer:mpPeerId,state});
+ else mpSend(mpChannels.get(mpHostId),{kind:'state',peer:mpPeerId,state});
+}
+function drawMultiplayerGhosts(){
+ if(!mpRoom||!mpStates.size)return;
+ const localHeight=Math.round((baseY-player.y)/10);
+ for(const [id,s] of mpStates){
+  if(!s)continue;
+  const x=Math.max(17,Math.min(W-17,(Number(s.x)||.5)*W));
+  const y=Math.max(48,Math.min(H-70,H*.42-(Number(s.height||0)-localHeight)*10));
+  const skin=MP_SKINS[s.skinId]||{color:'#d7a6ed',accent:'#8059b4'};
+  ctx.save();ctx.globalAlpha=s.playing===false ? .48 : .72;ctx.translate(x,y);
+  ctx.fillStyle=skin.color||'#d7a6ed';ctx.strokeStyle=skin.accent||'#8059b4';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.ellipse(0,0,13,16,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#294b3a';ctx.beginPath();ctx.arc(-4,-2,1.7,0,Math.PI*2);ctx.arc(4,-2,1.7,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=.9;ctx.font='bold 11px Kalam, sans-serif';ctx.textAlign='center';ctx.fillStyle='#294b3a';
+  ctx.fillText((s.name||'Гравець').slice(0,18),0,-23);ctx.fillText('↑ '+(s.score||0),0,29);ctx.restore();
+ }
+}
+$('mpBtn').onclick=()=>{show('mpModal',true);mpStatus(gameSession?.token?'Створи кімнату або введи код друга.':'Увійди через Telegram, щоб грати разом.');};
+$('mpClose').onclick=()=>show('mpModal',false);
+$('mpCreate').onclick=()=>{const code=mpCode();$('mpCodeInput').value=code;mpConnect(code,'host');};
+$('mpJoin').onclick=()=>{const code=$('mpCodeInput').value.trim().toUpperCase();if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){mpStatus('Введи правильний код із 6 символів.');return;}mpConnect(code,'client');};
+$('mpLeave').onclick=()=>mpDisconnect(true);
+$('mpCopy').onclick=async()=>{try{await navigator.clipboard.writeText(mpRoom);mpStatus('Код кімнати скопійовано!');}catch(e){mpStatus('Код кімнати: '+mpRoom);}};
+$('mpModal').addEventListener('click',e=>{if(e.target===$('mpModal'))show('mpModal',false);});
+setInterval(()=>{if(mpRoom&&performance.now()-mpLastSend>90){mpLastSend=performance.now();mpBroadcast();}},100);
+
 setAccountUI();authenticateMiniApp();
 
 resize();resetWorld();last=performance.now();lastDraw=0;requestAnimationFrame(frame);
