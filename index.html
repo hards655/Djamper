@@ -30,6 +30,7 @@ body.winter #instructionModal .card{background:#f4fbff;border-color:#4c91ac}
 #telegramLogin{display:flex;justify-content:center;min-height:40px}
 #telegramLogin iframe{max-width:100%}
 .leaderboardCard{background:#fffefa;border:3px solid #315d78;border-radius:18px;box-shadow:6px 7px 0 #315d7830}
+.rankMedal{display:inline-flex;align-items:center;justify-content:center;min-width:29px;font-family:system-ui,sans-serif;font-size:23px;line-height:1.2;filter:drop-shadow(0 1px 1px #294b3a35)}.rankRow.rank-1{background:#fff9dc}.rankRow.rank-2{background:#fff4d8}.rankRow.rank-3{background:#f0f3f5}.rankRow.rank-4{background:#f8e8dc}.rankRow.rank-wood .rankMedal{font-size:20px;opacity:.8}
 .tableWrap{max-height:52vh;overflow:auto;margin:12px 0;border:1px solid #b8cbd4;border-radius:10px}
 table{width:100%;border-collapse:collapse;font-size:21px;text-align:left}
 th,td{padding:7px 6px;border-bottom:1px dashed #c6d6dc}
@@ -318,7 +319,8 @@ async function showLeaderboard(){
   $('leaderboardRows').innerHTML=data.players.map((p,i)=>{
    const name=[p.first_name,p.last_name].filter(Boolean).join(' ')||p.username||'Гравець';
    const pic=p.photo_url?'<img src="'+String(p.photo_url).replace(/"/g,'&quot;')+'" alt="">':'';
-   return '<tr><td>'+(i+1)+'</td><td><div class="playerCell">'+pic+'<span>'+escapeHtml(name)+(p.username?' <small>@'+escapeHtml(p.username)+'</small>':'')+roleLabel(p.role)+'</span></div></td><td><b>'+Number(p.best_score).toLocaleString('uk-UA')+'</b></td><td>'+Number(p.games)+'</td></tr>';
+   const place=i+1,rankIcon=place===1?'💎':place===2?'🥇':place===3?'🥈':place===4?'🥉':'🪵',rankName=place===1?'Діамантове':place===2?'Золоте':place===3?'Срібне':place===4?'Бронзове':'Дерев’яне';
+   return '<tr class="rankRow rank-'+(place<=4?place:'wood')+'"><td><span class="rankMedal" title="'+rankName+' місце" aria-label="'+rankName+' місце">'+rankIcon+'</span></td><td><div class="playerCell">'+pic+'<span>'+escapeHtml(name)+(p.username?' <small>@'+escapeHtml(p.username)+'</small>':'')+roleLabel(p.role)+'</span></div></td><td><b>'+Number(p.best_score).toLocaleString('uk-UA')+'</b></td><td>'+Number(p.games)+'</td></tr>';
   }).join('')||'<tr><td colspan="4">Поки що гравців немає</td></tr>';
  }catch(e){$('leaderboardStatus').textContent=e.message+' · Перевір налаштування сервера.';}
 }
