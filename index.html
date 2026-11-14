@@ -100,6 +100,7 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
 @media(max-height:650px){.card{padding:10px 13px 13px}h1{font-size:40px}.subtitle{font-size:17px}.mascot{width:46px;height:46px;margin-bottom:5px}}
 
 
+.shopTabs{display:flex;gap:8px;margin:10px 0 4px}.shopTab{flex:1;padding:9px 5px;border:1.5px solid #78966d;border-radius:9px;background:#edf4e8;font-weight:800}.shopTab.active{background:#365b40;color:#fff;border-color:#365b40}
 .skinGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;max-height:48vh;overflow:auto;padding:2px}
 .skinItem{border:1.5px solid #78966d;border-radius:9px;background:#fffdf6;padding:9px 6px;text-align:center;min-width:0}
 .skinSwatch{width:43px;height:43px;margin:0 auto 5px;border:2px solid #294b3a;border-radius:45% 45% 35% 35%;display:flex;align-items:center;justify-content:center;font-size:24px}
@@ -122,7 +123,7 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
     <button id="closeLeaderboard" class="primary wide">Назад</button>
   </div>
 </section>
-<section id="shopModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">МАГАЗИН ПЕРСОНАЖІВ</div><h2>🎨 Обери свій скін</h2><div id="shopStatus" class="footnote">Завантаження магазину…</div><div id="skinGrid" class="skinGrid"></div><div class="shopNote">Оплата — Telegram Stars ⭐. Скін назавжди прив’язується до твого профілю.</div><button id="paymentSetupBtn" class="small wide hidden">🔗 Підключити оплату (творець)</button><button id="closeShop" class="primary wide">Назад</button></div></section><section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
+<section id="shopModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">МАГАЗИН ПЕРСОНАЖІВ</div><h2>🎨 Обери свій скін</h2><div id="shopStatus" class="footnote">Завантаження магазину…</div><div class="shopTabs"><button type="button" class="shopTab active" data-shop-tab="skins">🎨 Скіни</button><button type="button" class="shopTab" data-shop-tab="characters">🧙 Персонажі</button></div><div id="skinGrid" class="skinGrid"></div><div class="shopNote">Оплата — Telegram Stars ⭐. Скін назавжди прив’язується до твого профілю.</div><button id="paymentSetupBtn" class="small wide hidden">🔗 Підключити оплату (творець)</button><button id="closeShop" class="primary wide">Назад</button></div></section><section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
   <div class="card leaderboardCard">
     <div class="eyebrow">ПАНЕЛЬ ТВОРЦЯ</div><h2>⚙ Керування ролями</h2>
     <div id="adminStatus" class="footnote">Завантаження гравців…</div>
@@ -222,6 +223,18 @@ function drawSkinEffects(){
     ctx.globalCompositeOperation='lighter';ctx.fillStyle=halo;ctx.beginPath();ctx.ellipse(0,-5,37,42,0,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation='source-over';
     ctx.globalAlpha=.18+.09*pulse;ctx.strokeStyle=glow;ctx.lineWidth=1.1;ctx.beginPath();ctx.ellipse(0,-5,27+Math.sin(t*2)*1.2,33+Math.sin(t*2)*1.2,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
   }
+  if(selectedSkinId==='kapitoshka'){
+    // Бульбашки та хвильки навколо живої водяної краплі.
+    for(let i=0;i<4;i++){const a=t*1.2+i*1.57;ctx.globalAlpha=.48;ellipse(Math.cos(a)*25,-12+Math.sin(a)*26,2.2,2.8,'#d8fbff',null);}
+    ctx.globalAlpha=.65;path([[-17,-1+Math.sin(t*4)*2],[-8,-4+Math.sin(t*4)*2],[0,-1+Math.sin(t*4)*2],[9,-4+Math.sin(t*4)*2],[17,-1+Math.sin(t*4)*2]],'#ffffff',1.5);ctx.globalAlpha=1;
+  }else if(selectedSkinId==='lich'){
+    ctx.globalAlpha=.32+.12*pulse;ellipse(0,-5,34,41,'#8df5c5',null);ctx.globalAlpha=1;
+    for(let i=0;i<4;i++){const y=-34+((t*18+i*13)%43);ellipse(Math.sin(t*2+i)*23,y,1.5,2.4,'#a8e8c7',null);}
+  }else if(selectedSkinId==='skeleton'){
+    for(let i=0;i<3;i++){const x=-15+i*15;ellipse(x,-31,2,2,'#ffffff',null);}
+  }else if(selectedSkinId==='santa'||selectedSkinId==='saint'){
+    ctx.globalAlpha=.55;for(let i=0;i<4;i++){const a=t+i*1.57;ellipse(Math.cos(a)*27,-12+Math.sin(a)*28,1.7,1.7,'#fff0c8',null);}ctx.globalAlpha=1;
+  }
   if(selectedSkinId==='glass'){
     // Обертові кристалічні грані та мерехтливі відблиски.
     for(let i=0;i<4;i++){const a=t*.48+i*Math.PI/2,x=Math.cos(a)*30,y=-7+Math.sin(a)*31;
@@ -249,7 +262,44 @@ function drawSkinEffects(){
 }
 function drawPlayer(offset=0){const p=player;ctx.save();ctx.translate(p.x+offset,p.y-camera);if(p.invuln>0&&Math.floor(time*15)%2)ctx.globalAlpha=.5;if(p.shield>0){ellipse(0,0,29+Math.sin(time*7),34,'#a6dcf426','#59b0d5',2);ellipse(-13,-18,4,7,'#ffffffa0',null);}if(p.low>0){ctx.setLineDash([3,6]);ellipse(0,0,35,40,'#ffffff00','#6ab8c380',1);ctx.setLineDash([]);}if(p.invert>0)ctx.rotate(Math.PI);else ctx.rotate(p.vx*.00025);const squash=p.squash/.2;ctx.scale(1+squash*.2,1-squash*.18);drawSkinEffects();if(p.jet>0){box(-23,-4,11,28,4,'#d9dde0');box(12,-4,11,28,4,'#d9dde0');for(const x of [-18,18]){ctx.beginPath();ctx.moveTo(x-5,23);ctx.lineTo(x,40+Math.sin(time*48)*9);ctx.lineTo(x+5,23);ctx.fillStyle='#ee9c49';ctx.fill();}}
 path([[-10,15],[-11,23],[-19,23]],INK,3);path([[10,15],[11,23],[19,23]],INK,3);ctx.beginPath();ctx.moveTo(-16,13);ctx.bezierCurveTo(-20,-24,-6,-27,5,-24);ctx.bezierCurveTo(19,-22,20,-2,16,14);ctx.quadraticCurveTo(0,20,-16,13);ctx.save();ctx.clip();
-if(selectedSkinId==='glass'){
+if(selectedSkinId==='kapitoshka'){
+  // Крапля змінює силует від швидкості: витягується у польоті та плющиться при приземленні.
+  const stretch=Math.max(-.22,Math.min(.34,(player.vy||0)/1500));
+  const wobble=Math.sin(time*13)*.045;
+  ctx.save();ctx.translate(0,-2);ctx.scale(1-wobble-stretch*.35,1+wobble+stretch*.55);
+  const drop=ctx.createLinearGradient(-15,-28,15,20);
+  drop.addColorStop(0,'#ffffff');drop.addColorStop(.2,'#bff5ff');drop.addColorStop(.55,'#52c5f5');drop.addColorStop(.82,'#2496d2');drop.addColorStop(1,'#12618f');
+  ctx.beginPath();ctx.moveTo(0,-32);ctx.bezierCurveTo(8,-22,20,-5,17,7);ctx.bezierCurveTo(15,24,-15,24,-17,7);ctx.bezierCurveTo(-20,-5,-8,-22,0,-32);ctx.closePath();ctx.fillStyle=drop;ctx.fill();
+  ctx.globalAlpha=.58;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.ellipse(-7,-9,4,10,-.4,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=.25;ctx.strokeStyle='#e9ffff';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,2,14,19,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+}else if(selectedSkinId==='skeleton'){
+  ctx.fillStyle='#e9e4d8';ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle='#a1a0a0';ctx.lineWidth=1.5;
+  for(let k=0;k<3;k++){ctx.beginPath();ctx.ellipse(0,-9+k*7,11-k,3,0,0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;
+}else if(selectedSkinId==='santa'||selectedSkinId==='saint'){
+  const robe=ctx.createLinearGradient(-15,-25,15,18);robe.addColorStop(0,selectedSkinId==='santa'?'#ff7775':'#6e9fd5');robe.addColorStop(1,selectedSkinId==='santa'?'#a91f35':'#203f78');ctx.fillStyle=robe;ctx.fill();
+}else if(selectedSkinId==='lich'){
+  const robe=ctx.createLinearGradient(-16,-25,17,18);robe.addColorStop(0,'#77708f');robe.addColorStop(.55,'#343047');robe.addColorStop(1,'#111522');ctx.fillStyle=robe;ctx.fill();
+}else if(selectedSkinId==='robot'){
+  const metal=ctx.createLinearGradient(-15,-25,15,18);metal.addColorStop(0,'#f4fbff');metal.addColorStop(.5,'#9aa8b8');metal.addColorStop(1,'#46566a');ctx.fillStyle=metal;ctx.fill();
+}else if(selectedSkinId==='ninja'){
+  ctx.fillStyle=ctx.createLinearGradient(-15,-25,15,18);const ng=ctx.fillStyle; if(ng.addColorStop){ng.addColorStop(0,'#626c91');ng.addColorStop(1,'#20263c');}ctx.fill();
+}else if(selectedSkinId==='alien'){
+  ctx.fillStyle='#8bdc83';ctx.fill();
+}else if(selectedSkinId==='pirate'){
+  ctx.fillStyle='#a86b45';ctx.fill();
+}else if(selectedSkinId==='knight'){
+  const m=ctx.createLinearGradient(-15,-25,15,18);m.addColorStop(0,'#ffffff');m.addColorStop(.5,'#aab8c7');m.addColorStop(1,'#586b80');ctx.fillStyle=m;ctx.fill();
+}else if(selectedSkinId==='panda'){
+  ctx.fillStyle='#f1f1eb';ctx.fill();
+}else if(selectedSkinId==='fox'){
+  ctx.fillStyle='#f39a4b';ctx.fill();
+}else if(selectedSkinId==='astronaut'){
+  const suit=ctx.createLinearGradient(-15,-25,15,18);suit.addColorStop(0,'#ffffff');suit.addColorStop(1,'#8aa9bf');ctx.fillStyle=suit;ctx.fill();
+}else if(selectedSkinId==='slime'){
+  const slime=ctx.createLinearGradient(-15,-25,15,18);slime.addColorStop(0,'#eafff6');slime.addColorStop(.45,'#72e3b0');slime.addColorStop(1,'#248f77');ctx.fillStyle=slime;ctx.fill();
+}else if(selectedSkinId==='dragon'){
+  ctx.fillStyle=ctx.createLinearGradient(-15,-25,15,18);const dg=ctx.fillStyle;if(dg.addColorStop){dg.addColorStop(0,'#a4e99d');dg.addColorStop(1,'#34734c');}ctx.fill();
+}else if(selectedSkinId==='glass'){
   // Напівпрозорий мінерал з градієнтом, внутрішніми гранями та псевдозаломленням.
   const crystal=ctx.createLinearGradient(-17,-28,17,20);
   crystal.addColorStop(0,'#ffffffdf');crystal.addColorStop(.18,'#b9f4ffd0');
@@ -333,6 +383,39 @@ ctx.restore();
 else if(selectedSkinId==='galaxy'){for(let i=0;i<3;i++)ellipse(-8+i*8,-20-(i%2)*5,1.5,1.5,'#fff6c9',null);}
 else if(selectedSkinId==='rainbow'){path([[-10,-25],[0,-29],[10,-25]],'#e65b70',2);path([[-9,-22],[0,-26],[9,-22]],'#e6a53e',2);}
 else if(selectedSkinId==='neon'){path([[-7,-25],[1,-32],[-1,-25],[7,-25]],'#fff77b',2);}
+if(selectedSkinId==='skeleton'){
+  ellipse(-6,-12,4,5,'#20232b',null);ellipse(6,-12,4,5,'#20232b',null);path([[-4,-3],[0,1],[4,-3]],'#3b3b42',1.5);
+}else if(selectedSkinId==='robot'){
+  box(-12,-17,24,5,2,'#dff7ff');ellipse(-6,-11,2,2,'#54f5ff',null);ellipse(6,-11,2,2,'#54f5ff',null);path([[-7,-27],[7,-27]],'#e8fbff',2);
+}else if(selectedSkinId==='ninja'){
+  box(-15,-17,30,8,3,'#e8eaff');ellipse(-6,-13,2,2,'#fff',null);ellipse(6,-13,2,2,'#fff',null);
+}else if(selectedSkinId==='alien'){
+  ellipse(-6,-12,3,5,'#173b3a',null);ellipse(6,-12,3,5,'#173b3a',null);
+}else if(selectedSkinId==='pirate'){
+  path([[-15,-23],[0,-30],[15,-23]],'#252b3d',3);ellipse(0,-27,4,3,'#f5d06b',null);
+}else if(selectedSkinId==='knight'){
+  path([[-13,-19],[0,-27],[13,-19]],'#e5edf3',2);path([[-8,-10],[8,-10]],'#27394d',2);
+}else if(selectedSkinId==='panda'){
+  ellipse(-10,-17,6,7,'#252a32',null);ellipse(10,-17,6,7,'#252a32',null);ellipse(-6,-11,2,3,'#20242b',null);ellipse(6,-11,2,3,'#20242b',null);
+}else if(selectedSkinId==='fox'){
+  path([[-14,-19],[-15,-32],[-4,-24]],'#f39a4b',2);path([[4,-24],[15,-32],[14,-19]],'#f39a4b',2);
+}else if(selectedSkinId==='astronaut'){
+  ellipse(0,-15,13,8,'#5eb9e7','#eafaff',2);ctx.globalAlpha=.45;ellipse(-4,-17,4,2,'#fff',null);ctx.globalAlpha=1;
+}else if(selectedSkinId==='slime'){
+  ellipse(-6,-11,2,3,'#174f48',null);ellipse(6,-11,2,3,'#174f48',null);ctx.globalAlpha=.45;ellipse(-7,-20,5,3,'#fff',null);ctx.globalAlpha=1;
+}else if(selectedSkinId==='dragon'){
+  path([[-13,-20],[-19,-31],[-5,-25]],'#f2b35c',2);path([[5,-25],[19,-31],[13,-20]],'#f2b35c',2);
+}else if(selectedSkinId==='santa'){
+  path([[-15,-22],[0,-39],[15,-22]],'#d9444c',3);ellipse(0,-39,4,4,'#fff',null);path([[-14,-21],[14,-21]],'#fff',4);
+}else if(selectedSkinId==='saint'){
+  path([[-15,-21],[0,-37],[15,-21]],'#315e9c',3);ellipse(0,-37,3,3,'#f5d36d',null);path([[-13,-18],[13,-18]],'#f5d36d',2);
+}else if(selectedSkinId==='lich'){
+  ellipse(-6,-12,2.5,3,'#a8ffcf',null);ellipse(6,-12,2.5,3,'#a8ffcf',null);
+  // Коса Жнеця: темне держално, срібне лезо й зелений магічний вогонь.
+  ctx.save();ctx.translate(20,-20);ctx.rotate(-.25);path([[0,-3],[0,38]],'#777f91',3);path([[0,-2],[5,-14],[14,-20],[10,-10],[3,-5]],'#c9e8e1',2.4);ellipse(8,-13,3,3,'#9cffcf',null);ctx.restore();
+}else if(selectedSkinId==='kapitoshka'){
+  ellipse(-6,-9,2,3,'#155477',null);ellipse(6,-9,2,3,'#155477',null);path([[-3,0],[0,2],[3,0]],'#ffffff',1.3);
+}
 if(p.shoot>.12)box(-4,-33,8,16,3,'#d0e6a4');else box(p.face>0?9:-22,-9,13,8,4,'#c7e39b');if(p.prop>0){ellipse(0,-26,16,7,'#c8a9d8');path([[0,-29],[0,-38]],INK,2);ellipse(0,-39,22*Math.abs(Math.sin(time*32))+3,3,'#e7a07d',INK,1.5);}ctx.restore();}
 function draw(){ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);if(winterTheme){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#c5e8f8');sky.addColorStop(1,'#d5edf7');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);if(winterBgCache){const bgY=-Math.min(H*.025,Math.max(0,camera*.004));ctx.globalAlpha=.22;ctx.drawImage(winterBgCache,0,bgY,W,H*1.03);ctx.globalAlpha=1;ctx.fillStyle='#eaf7fc20';ctx.fillRect(0,0,W,H);}ctx.fillStyle='#d8efff12';ctx.fillRect(0,0,W,H);}else{ctx.fillStyle='#faf7ed';ctx.fillRect(0,0,W,H);}ctx.lineCap='round';ctx.lineJoin='round';const off=(((-camera*.65)%26)+26)%26;ctx.lineWidth=.7;ctx.strokeStyle=winterTheme?'#d9f1ff18':'#aec8d34a';ctx.beginPath();for(let y=off;y<H;y+=26){ctx.moveTo(0,y);ctx.lineTo(W,y);}for(let x=0;x<W;x+=26){ctx.moveTo(x,0);ctx.lineTo(x,H);}ctx.stroke();path([[35,0],[35,H]],winterTheme?'#d8a7ad55':'#da9c9c70',1.2);path([[39,0],[39,H]],winterTheme?'#d8a7ad25':'#da9c9c35',1);for(let y=off+26;y<H;y+=156)ellipse(16,y,4,4,winterTheme?'#d2e8ef':'#deddd4',null);
 if(winterTheme){ctx.fillStyle='#ffffff';for(const f of snowSeed){const x=(f.x+Math.sin(time*.7+f.phase)*15+W)%W,y=(f.y+time*f.s-camera*.08)%(H+20);ctx.globalAlpha=.24+(f.r*.035);ctx.beginPath();ctx.arc(x,y,f.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.save();const gy=H*.145+((camera*.018)%18);ctx.beginPath();ctx.moveTo(0,gy-3);ctx.quadraticCurveTo(W*.5,gy+34,W,gy-3);ctx.strokeStyle='#263d5740';ctx.lineWidth=1.2;ctx.stroke();for(let gx=14;gx<W;gx+=48){const t=gx/W;const by=gy-3+Math.sin(t*Math.PI)*34;const pulse=.78+.22*Math.sin(time*3+gx);ctx.globalAlpha=pulse;ctx.fillStyle='#fff0bd';ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(gx,by+5,1.8,0,Math.PI*2);ctx.fill();}ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();}
@@ -361,8 +444,8 @@ function frame(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
 // Telegram Mini App authentication + Cloudflare Worker.
 const API_BASE=(window.GAME_CONFIG&&window.GAME_CONFIG.apiBase||'').replace(/\/+$/,'');
 const SESSION_KEY='notebook-jump-session-v1';
-const SKIN_CATALOG=[{"id":"mint","name":"М’ятка","price":5,"color":"#9de3c1","accent":"#4b9b79","emoji":"🌿"},{"id":"ocean","name":"Океан","price":5,"color":"#7dc9ed","accent":"#287aa7","emoji":"🌊"},{"id":"sunset","name":"Захід","price":6,"color":"#ffb17e","accent":"#dc6b5c","emoji":"🌅"},{"id":"lavender","name":"Лаванда","price":6,"color":"#c7a9ef","accent":"#8059b4","emoji":"💜"},{"id":"flame","name":"Полум’я","price":7,"color":"#ff8b62","accent":"#b83d32","emoji":"🔥"},{"id":"forest","name":"Лісовик","price":7,"color":"#83bd75","accent":"#426f43","emoji":"🌲"},{"id":"galaxy","name":"Космос","price":8,"color":"#8d8be8","accent":"#47428f","emoji":"🌌"},{"id":"neon","name":"Неон","price":8,"color":"#8ee9e1","accent":"#158c91","emoji":"⚡"},{"id":"rainbow","name":"Веселка","price":10,"color":"#f39cc5","accent":"#a34b93","emoji":"🌈"},{"id":"crown","name":"Королівський","price":50,"color":"#f5d36d","accent":"#a7771d","emoji":"👑","exclusive":true},{"id":"admin","name":"Адмінський","price":2000,"color":"#30313a","accent":"#d83a4b","emoji":"🛡️","exclusive":true},{"id":"creator","name":"Скін творця","price":10000,"color":"#1688e8","accent":"#ffd52a","emoji":"🇺🇦","exclusive":true},{"id":"glass","name":"Кристал","price":25,"color":"#a8efff","accent":"#e9ffff","emoji":"💎","exclusive":true}];
-let ownedSkins=[],selectedSkinId='default',selectedSkin= {color:'#b6df88',accent:'#739b57',id:'default'};
+const SKIN_CATALOG=[{"id":"mint","name":"М’ятка","price":5,"color":"#9de3c1","accent":"#4b9b79","emoji":"🌿"},{"id":"ocean","name":"Океан","price":5,"color":"#7dc9ed","accent":"#287aa7","emoji":"🌊"},{"id":"sunset","name":"Захід","price":6,"color":"#ffb17e","accent":"#dc6b5c","emoji":"🌅"},{"id":"lavender","name":"Лаванда","price":6,"color":"#c7a9ef","accent":"#8059b4","emoji":"💜"},{"id":"flame","name":"Полум’я","price":7,"color":"#ff8b62","accent":"#b83d32","emoji":"🔥"},{"id":"forest","name":"Лісовик","price":7,"color":"#83bd75","accent":"#426f43","emoji":"🌲"},{"id":"galaxy","name":"Космос","price":8,"color":"#8d8be8","accent":"#47428f","emoji":"🌌"},{"id":"neon","name":"Неон","price":8,"color":"#8ee9e1","accent":"#158c91","emoji":"⚡"},{"id":"rainbow","name":"Веселка","price":10,"color":"#f39cc5","accent":"#a34b93","emoji":"🌈"},{"id":"crown","name":"Королівський","price":50,"color":"#f5d36d","accent":"#a7771d","emoji":"👑","exclusive":true},{"id":"admin","name":"Адмінський","price":2000,"color":"#30313a","accent":"#d83a4b","emoji":"🛡️","exclusive":true},{"id":"creator","name":"Скін творця","price":10000,"color":"#1688e8","accent":"#ffd52a","emoji":"🇺🇦","exclusive":true},{"id":"glass","name":"Кристал","price":25,"color":"#a8efff","accent":"#e9ffff","emoji":"💎","exclusive":true},{"id":"robot","name":"Робот","price":5,"color":"#9aa8b8","accent":"#e5f4ff","emoji":"🤖","exclusive":false,"category":"characters"},{"id":"ninja","name":"Ніндзя","price":6,"color":"#343b58","accent":"#a7b5ff","emoji":"🥷","exclusive":false,"category":"characters"},{"id":"alien","name":"Прибулець","price":7,"color":"#8bdc83","accent":"#d8ff8d","emoji":"👽","exclusive":false,"category":"characters"},{"id":"pirate","name":"Пірат","price":8,"color":"#a86b45","accent":"#f5d06b","emoji":"🏴‍☠️","exclusive":false,"category":"characters"},{"id":"knight","name":"Лицар","price":9,"color":"#9ca8b8","accent":"#f1d38a","emoji":"🛡️","exclusive":false,"category":"characters"},{"id":"panda","name":"Панда","price":5,"color":"#e8e8e8","accent":"#30343b","emoji":"🐼","exclusive":false,"category":"characters"},{"id":"fox","name":"Лисичка","price":6,"color":"#f39a4b","accent":"#fff0c9","emoji":"🦊","exclusive":false,"category":"characters"},{"id":"astronaut","name":"Космонавт","price":10,"color":"#d5e5ef","accent":"#65bde8","emoji":"🚀","exclusive":false,"category":"characters"},{"id":"slime","name":"Слайм","price":7,"color":"#72e3b0","accent":"#c4ffe8","emoji":"🫧","exclusive":false,"category":"characters"},{"id":"dragon","name":"Дракончик","price":10,"color":"#62b77b","accent":"#f2b35c","emoji":"🐉","exclusive":false,"category":"characters"},{"id":"skeleton","name":"Скелет","price":150,"color":"#e9e4d8","accent":"#9b9ca8","emoji":"💀","exclusive":true,"category":"characters"},{"id":"santa","name":"Дід Мороз","price":200,"color":"#d9444c","accent":"#fff0df","emoji":"🎅","exclusive":true,"category":"characters"},{"id":"saint","name":"Св. Миколай","price":150,"color":"#315e9c","accent":"#f5d36d","emoji":"🎁","exclusive":true,"category":"characters"},{"id":"kapitoshka","name":"Капітошка","price":20,"color":"#58c9ff","accent":"#e8ffff","emoji":"💧","exclusive":false,"category":"characters"},{"id":"lich","name":"Ліч — Жнець","price":250,"color":"#4a4268","accent":"#a8e8c7","emoji":"☠️","exclusive":true,"category":"characters"}];
+let ownedSkins=[],selectedSkinId='default',selectedSkin= {color:'#b6df88',accent:'#739b57',id:'default'},shopTab='skins';
 let gameSession=null;
 try{gameSession=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){}
 function apiHeaders(){return gameSession&&gameSession.token?{'Authorization':'Bearer '+gameSession.token,'Content-Type':'application/json'}:{'Content-Type':'application/json'};}
@@ -399,22 +482,25 @@ async function submitOnlineScore(value){
 }
 
 async function loadShop(){
- show('shopModal',true);$('paymentSetupBtn').classList.toggle('hidden',gameSession?.user?.role!=='creator');$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
+ show('shopModal',true);shopTab='skins';document.querySelectorAll('[data-shop-tab]').forEach(b=>b.classList.toggle('active',b.dataset.shopTab===shopTab));$('paymentSetupBtn').classList.toggle('hidden',gameSession?.user?.role!=='creator');$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
  if(!gameSession?.token){$('shopStatus').textContent='Спочатку відкрий гру через Telegram, щоб увійти.';return;}
  try{
   const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
   ownedSkins=data.owned||[];selectedSkinId=data.selected||'default';applySelectedSkin();
-  $('shopStatus').textContent='Твій скін: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId))+' · 11 скінів у каталозі';
+  $('shopStatus').textContent='Твій скін: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId))+' · '+SKIN_CATALOG.length+' предметів у каталозі';
   renderShop();
  }catch(e){$('shopStatus').textContent=e.message;}
 }
 function applySelectedSkin(){selectedSkinId=selectedSkinId||'default';selectedSkin=SKIN_CATALOG.find(x=>x.id===selectedSkinId)||{id:'default',color:'#b6df88',accent:'#739b57'};}
 function renderShop(){
- $('skinGrid').innerHTML='<div class="skinItem"><div class="skinSwatch" style="background:#b6df88">🙂</div><strong>Класичний</strong><small>Безкоштовно</small><button data-skin="default">'+(selectedSkinId==='default'?'Обрано':'Обрати')+'</button></div>'+SKIN_CATALOG.map(s=>{
+ const items=SKIN_CATALOG.filter(x=>(x.category||'skins')===shopTab);
+ const defaultCard=shopTab==='skins'?'<div class="skinItem"><div class="skinSwatch" style="background:#b6df88">🙂</div><strong>Класичний</strong><small>Безкоштовно</small><button data-skin="default">'+(selectedSkinId==='default'?'Обрано':'Обрати')+'</button></div>':'';
+ $('skinGrid').innerHTML=defaultCard+items.map(s=>{
  const owned=ownedSkins.includes(s.id),selected=selectedSkinId===s.id;
  return '<div class="skinItem '+(s.exclusive?'exclusive':'')+'"><div class="skinSwatch" style="background:'+s.color+';box-shadow:inset 0 -7px 0 '+s.accent+'">'+s.emoji+'</div><strong>'+escapeHtml(s.name)+'</strong><small>'+(owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''))+'</small><button data-skin="'+s.id+'">'+(selected?'Обрано':owned?'Обрати':'Купити')+'</button></div>';
  }).join('');
  $('skinGrid').querySelectorAll('button[data-skin]').forEach(b=>b.onclick=()=>chooseSkin(b.dataset.skin));
+ document.querySelectorAll('[data-shop-tab]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.shopTab;document.querySelectorAll('[data-shop-tab]').forEach(x=>x.classList.toggle('active',x===b));renderShop();});
 }
 async function chooseSkin(id){
  if(id!=='default'&&!ownedSkins.includes(id)){
