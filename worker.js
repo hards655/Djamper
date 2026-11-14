@@ -108,7 +108,7 @@ export default {
     const stub=env.ROOMS.get(id);
     const target=new URL(request.url);
     target.searchParams.delete('token');
-    target.searchParams.set('peer',String(actor.telegram_id));
+    target.searchParams.set('peer',crypto.randomUUID());
     target.searchParams.set('name',name.slice(0,48));
     return stub.fetch(new Request(target.toString(),request));
    }
