@@ -23,14 +23,21 @@ async function verifyToken(env, token){
   if(expected!==sig)return null;
   try{const p=JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));if(p.exp<Date.now())return null;return p.sub;}catch{return null;}
 }
-async function verifyTelegram(env, user){
-  if(!user || !user.hash || !user.id || !user.auth_date) return false;
-  const authDate=Number(user.auth_date);
-  if(!Number.isFinite(authDate) || Math.abs(Date.now()/1000-authDate)>86400) return false;
-  const check=Object.keys(user).filter(k=>k!=='hash' && user[k]!==undefined && user[k]!==null)
-    .sort().map(k=>`${k}=${user[k]}`).join('\n');
-  const secret=new Uint8Array(await sha256(encoder.encode(env.TELEGRAM_BOT_TOKEN)));
-  return hex(await hmac(secret,check))===String(user.hash).toLowerCase();
+async function verifyTelegram(env, initData){
+  if(!initData || typeof initData!=='string' || initData.length>8192) return null;
+  const params=new URLSearchParams(initData);
+  const receivedHash=params.get('hash');
+  const authDate=Number(params.get('auth_date'));
+  if(!receivedHash || !Number.isFinite(authDate) || authDate>Date.now()/1000+60 || Date.now()/1000-authDate>86400) return null;
+  const check=[...params.entries()].filter(([key])=>key!=='hash' && key!=='signature')
+    .sort(([a],[b])=>a.localeCompare(b)).map(([key,value])=>key+'='+value).join('\\n');
+  const secret=await hmac(encoder.encode('WebAppData'),env.TELEGRAM_BOT_TOKEN);
+  if(hex(await hmac(secret,check))!==receivedHash.toLowerCase()) return null;
+  try{
+    const user=JSON.parse(params.get('user')||'null');
+    if(!user || !user.id) return null;
+    return user;
+  }catch{return null;}
 }
 function originAllowed(request, env){
   const origin=request.headers.get('Origin')||'';
@@ -52,8 +59,9 @@ export default {
   try{
    if(url.pathname==='/api/health' && request.method==='GET') return json({ok:true},200,origin);
    if(url.pathname==='/api/auth' && request.method==='POST'){
-    const user=await request.json();
-    if(!await verifyTelegram(env,user)) return json({error:'Telegram-підпис недійсний або застарілий'},401,origin);
+    const body=await request.json();
+    const user=await verifyTelegram(env,body.initData);
+    if(!user) return json({error:'Telegram Mini App initData недійсний або застарілий'},401,origin);
     const id=String(user.id);
     await env.DB.prepare(`INSERT INTO players(telegram_id,username,first_name,last_name,photo_url)
       VALUES(?,?,?,?,?) ON CONFLICT(telegram_id) DO UPDATE SET username=excluded.username,
