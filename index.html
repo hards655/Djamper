@@ -122,7 +122,7 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
     <button id="closeLeaderboard" class="primary wide">Назад</button>
   </div>
 </section>
-<section id="shopModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">МАГАЗИН ПЕРСОНАЖІВ</div><h2>🎨 Обери свій скін</h2><div id="shopStatus" class="footnote">Завантаження магазину…</div><div id="skinGrid" class="skinGrid"></div><div class="shopNote">Оплата — Telegram Stars ⭐. Скін назавжди прив’язується до твого профілю.</div><button id="closeShop" class="primary wide">Назад</button></div></section><section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
+<section id="shopModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">МАГАЗИН ПЕРСОНАЖІВ</div><h2>🎨 Обери свій скін</h2><div id="shopStatus" class="footnote">Завантаження магазину…</div><div id="skinGrid" class="skinGrid"></div><div class="shopNote">Оплата — Telegram Stars ⭐. Скін назавжди прив’язується до твого профілю.</div><button id="paymentSetupBtn" class="small wide hidden">🔗 Підключити оплату (творець)</button><button id="closeShop" class="primary wide">Назад</button></div></section><section id="adminModal" class="overlay hidden" aria-modal="true" role="dialog">
   <div class="card leaderboardCard">
     <div class="eyebrow">ПАНЕЛЬ ТВОРЦЯ</div><h2>⚙ Керування ролями</h2>
     <div id="adminStatus" class="footnote">Завантаження гравців…</div>
@@ -254,7 +254,7 @@ for(let i=0;i<5;i++){const a=i*Math.PI*2/5;
 ctx.beginPath();ctx.arc(8+Math.cos(a)*3,-46+Math.sin(a)*3,1.1,0,Math.PI*2);
 ctx.fillStyle='#fff';ctx.fill();}
 ctx.restore();
-}if(selectedSkinId==='crown'){path([[-11,-24],[-11,-35],[-5,-29],[0,-39],[5,-29],[11,-35],[11,-24]],'#e5b735',INK,1.5);ellipse(0,-39,2.5,2.5,'#fff4b2',null);}
+}if(selectedSkinId==='crown'){path([[-11,-24],[-11,-35],[-5,-29],[0,-39],[5,-29],[11,-35],[11,-24]],'#a7771d',2.5);ellipse(0,-39,2.5,2.5,'#fff4b2',null);}
 else if(selectedSkinId==='galaxy'){for(let i=0;i<3;i++)ellipse(-8+i*8,-20-(i%2)*5,1.5,1.5,'#fff6c9',null);}
 else if(selectedSkinId==='rainbow'){path([[-10,-25],[0,-29],[10,-25]],'#e65b70',2);path([[-9,-22],[0,-26],[9,-22]],'#e6a53e',2);}
 else if(selectedSkinId==='neon'){path([[-7,-25],[1,-32],[-1,-25],[7,-25]],'#fff77b',2);}
@@ -324,7 +324,7 @@ async function submitOnlineScore(value){
 }
 
 async function loadShop(){
- show('shopModal',true);$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
+ show('shopModal',true);$('paymentSetupBtn').classList.toggle('hidden',gameSession?.user?.role!=='creator');$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
  if(!gameSession?.token){$('shopStatus').textContent='Спочатку відкрий гру через Telegram, щоб увійти.';return;}
  try{
   const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
@@ -401,7 +401,7 @@ async function changeRole(id,role){
   await showAdminPanel();toast('Роль гравця оновлено');
  }catch(e){toast(e.message);}
 }
-$('leaderboardBtn').onclick=showLeaderboard;$('shopBtn').onclick=loadShop;$('closeShop').onclick=()=>show('shopModal',false);$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
+$('leaderboardBtn').onclick=showLeaderboard;$('shopBtn').onclick=loadShop;$('closeShop').onclick=()=>show('shopModal',false);$('paymentSetupBtn').onclick=async()=>{try{$('shopStatus').textContent='Підключаємо Telegram webhook…';const res=await fetch(API_BASE+'/api/admin/payments/setup',{method:'POST',headers:apiHeaders(),body:'{}'}),data=await res.json();if(!res.ok)throw new Error(data.error||'Помилка налаштування');$('shopStatus').textContent='Оплату Telegram Stars підключено! ⭐';}catch(e){$('shopStatus').textContent=e.message;}};$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
 $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('adminModal',false);
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
 setAccountUI();authenticateMiniApp();
