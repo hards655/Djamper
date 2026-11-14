@@ -225,7 +225,7 @@ export class MultiplayerRoom {
   if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket') return new Response('WebSocket required',{status:426});
   const url=new URL(request.url),peer=url.searchParams.get('peer')||'',role=url.searchParams.get('role')||'client';
   const name=(url.searchParams.get('name')||'Гравець').slice(0,48);
-  if(!/^\d{1,24}$/.test(peer)||!['host','client'].includes(role)) return new Response('Bad request',{status:400});
+  if(!/^[0-9a-f-]{36}$/i.test(peer)||!['host','client'].includes(role)) return new Response('Bad request',{status:400});
   const sockets=this.ctx.getWebSockets();
   const members=sockets.map(ws=>ws.deserializeAttachment()).filter(Boolean);
   if(members.some(m=>m.peer===peer)) return new Response('Already connected',{status:409});
