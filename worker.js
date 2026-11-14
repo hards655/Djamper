@@ -119,6 +119,12 @@ export default {
    if(url.pathname==='/api/shop/me' && request.method==='GET'){
     const actor=await currentPlayer(request,env);if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
     await ensureShopTables(env);
+    // Творець і адміністратори отримують усі скіни без оплати.
+    if(actor.role==='creator'||actor.role==='admin'){
+      for(const skin of SKINS){
+        await env.DB.prepare('INSERT OR IGNORE INTO player_skins(telegram_id,skin_id) VALUES(?,?)').bind(actor.telegram_id,skin.id).run();
+      }
+    }
     const owned=await env.DB.prepare('SELECT skin_id FROM player_skins WHERE telegram_id=?').bind(actor.telegram_id).all();
     const selected=await env.DB.prepare('SELECT skin_id FROM player_skin_selection WHERE telegram_id=?').bind(actor.telegram_id).first();
     return json({skins:SKINS,owned:owned.results.map(x=>x.skin_id),selected:selected?.skin_id||'default'},200,origin);
