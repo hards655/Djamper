@@ -92,6 +92,27 @@ export default {
     }
     return json({ok:true},200,origin);
    }
+
+   // WebRTC signaling only: game-state traffic stays on direct peer connections.
+   const roomMatch=url.pathname.match(/^\/api\/mp\/signal\/([A-Z0-9]{6})$/);
+   if(roomMatch && request.headers.get('Upgrade')?.toLowerCase()==='websocket'){
+    const token=url.searchParams.get('token')||'';
+    const telegramId=await verifyToken(env,token);
+    if(!telegramId) return json({error:'Потрібно увійти через Telegram'},401,origin);
+    const actor=await env.DB.prepare('SELECT telegram_id,username,first_name,last_name FROM players WHERE telegram_id=?').bind(String(telegramId)).first();
+    if(!actor) return json({error:'Профіль гравця не знайдено'},401,origin);
+    const role=url.searchParams.get('role')||'client';
+    if(!['host','client'].includes(role)) return json({error:'Некоректна роль кімнати'},400,origin);
+    const name=[actor.first_name,actor.last_name].filter(Boolean).join(' ')||actor.username||'Гравець';
+    const id=env.ROOMS.idFromName(roomMatch[1]);
+    const stub=env.ROOMS.get(id);
+    const target=new URL(request.url);
+    target.searchParams.delete('token');
+    target.searchParams.set('peer',String(actor.telegram_id));
+    target.searchParams.set('name',name.slice(0,48));
+    return stub.fetch(new Request(target.toString(),request));
+   }
+
    if(url.pathname==='/api/health' && request.method==='GET') return json({ok:true},200,origin);
    if(url.pathname==='/api/auth' && request.method==='POST'){
     const body=await request.json();
@@ -192,3 +213,61 @@ export default {
   }catch(e){return json({error:'Server error',detail:env.ENVIRONMENT==='development'?String(e):undefined},500,origin);}
  }
 };
+
+
+/**
+ * One Durable Object per room. It only forwards SDP/ICE signaling messages;
+ * gameplay state must travel directly over WebRTC data channels.
+ */
+export class MultiplayerRoom {
+ constructor(ctx, env){this.ctx=ctx;this.env=env;}
+ async fetch(request){
+  if(request.headers.get('Upgrade')?.toLowerCase()!=='websocket') return new Response('WebSocket required',{status:426});
+  const url=new URL(request.url),peer=url.searchParams.get('peer')||'',role=url.searchParams.get('role')||'client';
+  const name=(url.searchParams.get('name')||'Гравець').slice(0,48);
+  if(!/^\d{1,24}$/.test(peer)||!['host','client'].includes(role)) return new Response('Bad request',{status:400});
+  const sockets=this.ctx.getWebSockets();
+  const members=sockets.map(ws=>ws.deserializeAttachment()).filter(Boolean);
+  if(members.some(m=>m.peer===peer)) return new Response('Already connected',{status:409});
+  const host=members.find(m=>m.role==='host');
+  if(role==='host' && host) return new Response('Room already has a host',{status:409});
+  if(role==='client' && !host) return new Response('Host is not connected',{status:404});
+  if(members.length>=5) return new Response('Room is full',{status:409});
+  const pair=new WebSocketPair(),client=pair[0],server=pair[1];
+  server.serializeAttachment({peer,role,name});
+  this.ctx.acceptWebSocket(server);
+  server.addEventListener('message',event=>this.onMessage(server,event.data));
+  server.addEventListener('close',()=>this.onClose(server));
+  server.addEventListener('error',()=>this.onClose(server));
+  const current=[...members,{peer,role,name}];
+  this.send(server,{type:'welcome',self:peer,role,players:current.map(({peer,role,name})=>({peer,role,name}))});
+  this.broadcast({type:'player-joined',player:{peer,role,name}},server);
+  return new Response(null,{status:101,webSocket:client});
+ }
+ send(ws,data){try{ws.send(JSON.stringify(data));}catch{}}
+ broadcast(data,except=null){for(const ws of this.ctx.getWebSockets()){if(ws!==except)this.send(ws,data);}}
+ onMessage(ws,raw){
+  if(typeof raw!=='string'||raw.length>20000){try{ws.close(1009,'Message too large');}catch{}return;}
+  let msg;try{msg=JSON.parse(raw);}catch{return;}
+  const sender=ws.deserializeAttachment();if(!sender)return;
+  if(msg.type!=='signal'||!['offer','answer','ice'].includes(msg.signalType))return;
+  if(msg.data==null||JSON.stringify(msg.data).length>16000)return;
+  const target=String(msg.to||'');
+  const recipient=this.ctx.getWebSockets().find(other=>{
+   const meta=other.deserializeAttachment();return meta&&meta.peer===target;
+  });
+  if(!recipient)return;
+  // Only the host may initiate offers; clients may answer or send ICE.
+  if(msg.signalType==='offer'&&sender.role!=='host')return;
+  if(msg.signalType==='answer'&&sender.role!=='client')return;
+  this.send(recipient,{type:'signal',from:sender.peer,signalType:msg.signalType,data:msg.data});
+ }
+ onClose(ws){
+  const meta=ws.deserializeAttachment();if(!meta)return;
+  if(meta.role==='host'){
+   for(const other of this.ctx.getWebSockets()){try{other.close(1000,'Host left');}catch{}}
+   return;
+  }
+  this.broadcast({type:'player-left',peer:meta.peer});
+ }
+}
