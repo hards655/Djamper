@@ -124,7 +124,7 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
     <button id="closeAdmin" class="primary wide">Готово</button>
   </div>
 </section>
-</main><script src="./config.js"></script><script>
+</main><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="./config.js"></script><script>
 'use strict';
 (() => {
 const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false}),app=$('app');
@@ -272,9 +272,8 @@ applyTheme();$('themeToggle').onclick=toggleTheme;$('instructionsBtn').onclick=(
 const FRAME_MS=1000/60;
 function frame(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;if(toastTime>0){toastTime-=dt;if(toastTime<=0)show('toast',false);}if(tiltWarn&&now>tiltWarn){tiltWarn=0;if(!tiltReady){$('tilt').textContent='Спробувати знову';toast('Датчик не відповідає. Використовуйте дотики; для нахилу відкрийте гру через HTTPS і перевірте дозволи.');}}if(mode==='playing'){acc+=dt;let steps=0;while(acc>=STEP&&steps++<5&&mode==='playing'){update(STEP);acc-=STEP;}if(steps>=5&&acc>=STEP)acc=0;}else acc=0;if(!lastDraw||now-lastDraw>=FRAME_MS-0.5){draw();lastDraw=now-(now-lastDraw)%FRAME_MS;}requestAnimationFrame(frame);}
 
-// Онлайн-профіль: Telegram Login Widget + Cloudflare Worker.
+// Telegram Mini App authentication + Cloudflare Worker.
 const API_BASE=(window.GAME_CONFIG&&window.GAME_CONFIG.apiBase||'').replace(/\/+$/,'');
-const BOT_NAME=window.GAME_CONFIG&&window.GAME_CONFIG.telegramBot||'';
 const SESSION_KEY='notebook-jump-session-v1';
 let gameSession=null;
 try{gameSession=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){}
@@ -287,20 +286,19 @@ function setAccountUI(){
   const u=gameSession.user,name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.username||'Гравець';
   status.innerHTML='✍ '+escapeHtml(name)+(u.username?' (@'+escapeHtml(u.username)+')':'')+roleLabel(u.role);
   login.classList.add('hidden');logout.classList.remove('hidden');adminBtn.classList.toggle('hidden',u.role!=='creator');
- }else{status.textContent='Гість · увійди, щоб зберігати рекорди онлайн';login.classList.remove('hidden');logout.classList.add('hidden');adminBtn.classList.add('hidden');}
+ }else{status.textContent='Відкрий ДЖАМПЕР через Telegram, щоб увійти автоматично';login.classList.add('hidden');logout.classList.add('hidden');adminBtn.classList.add('hidden');}
 }
-window.onTelegramAuth=async function(user){
+async function authenticateMiniApp(){
+ const tg=window.Telegram&&window.Telegram.WebApp;
+ if(!API_BASE){$('accountStatus').textContent='Помилка: не налаштовано адресу сервера.';return;}
+ if(!tg||!tg.initData){setAccountUI();return;}
  try{
-  if(!API_BASE)throw new Error('Спочатку налаштуй адресу API у config.js');
-  const res=await fetch(API_BASE+'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(user)});
+  tg.ready();tg.expand();
+  $('accountStatus').textContent='Перевіряємо Telegram-профіль…';
+  const res=await fetch(API_BASE+'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
   const data=await res.json();if(!res.ok)throw new Error(data.error||'Помилка входу');
-  gameSession=data;localStorage.setItem(SESSION_KEY,JSON.stringify(gameSession));setAccountUI();toast('Вітаємо! Профіль Telegram підключено ✨');
- }catch(e){toast('Не вдалося увійти: '+e.message);}
-};
-function loadTelegramWidget(){
- const box=$('telegramLogin');if(!box||!BOT_NAME){box.textContent='Telegram-вхід з’явиться після налаштування config.js';return;}
- const script=document.createElement('script');script.src='https://telegram.org/js/telegram-widget.js?22';script.async=true;
- script.dataset.telegramLogin=BOT_NAME;script.dataset.size='large';script.dataset.userpic='true';script.dataset.requestAccess='write';script.dataset.onauth='onTelegramAuth(user)';box.appendChild(script);
+  gameSession=data;localStorage.setItem(SESSION_KEY,JSON.stringify(gameSession));setAccountUI();
+ }catch(e){gameSession=null;localStorage.removeItem(SESSION_KEY);$('accountStatus').textContent='Не вдалося увійти: '+e.message;}
 }
 async function submitOnlineScore(value){
  if(!API_BASE||!gameSession||!gameSession.token)return;
@@ -348,7 +346,7 @@ async function changeRole(id,role){
 $('leaderboardBtn').onclick=showLeaderboard;$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
 $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('adminModal',false);
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
-setAccountUI();loadTelegramWidget();
+setAccountUI();authenticateMiniApp();
 
 resize();resetWorld();last=performance.now();lastDraw=0;requestAnimationFrame(frame);
 })();
