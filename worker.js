@@ -29,9 +29,9 @@ async function verifyTelegram(env, initData){
   const receivedHash=params.get('hash');
   const authDate=Number(params.get('auth_date'));
   if(!receivedHash || !Number.isFinite(authDate) || authDate>Date.now()/1000+60 || Date.now()/1000-authDate>86400) return null;
-  const check=[...params.entries()].filter(([key])=>key!=='hash' && key!=='signature')
+  const check=[...params.entries()].filter(([key])=>key!=='hash')
     .sort(([a],[b])=>a.localeCompare(b)).map(([key,value])=>key+'='+value).join('\\n');
-  const secret=await hmac(encoder.encode('WebAppData'),env.TELEGRAM_BOT_TOKEN);
+  const secret=await hmac(encoder.encode(env.TELEGRAM_BOT_TOKEN),'WebAppData');
   if(hex(await hmac(secret,check))!==receivedHash.toLowerCase()) return null;
   try{
     const user=JSON.parse(params.get('user')||'null');
