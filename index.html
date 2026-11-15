@@ -621,6 +621,8 @@ function drawWinterEnvironment(){
  // Повноекранний зимовий краєвид: північне сяйво, далекі гори та засніжений ліс.
  const par=(camera*.035)%90;
  ctx.save();
+ // Soft, low-contrast painted backdrop; gameplay remains visually dominant.
+ ctx.globalAlpha=.68;
  const aur=ctx.createLinearGradient(0,H*.08,W,H*.58);aur.addColorStop(0,'#8bcbdc00');aur.addColorStop(.48,'#75c9c755');aur.addColorStop(1,'#a6d9e900');
  ctx.fillStyle=aur;ctx.beginPath();ctx.moveTo(0,H*.13);ctx.bezierCurveTo(W*.25,H*.02,W*.48,H*.42,W*.72,H*.18);ctx.bezierCurveTo(W*.86,H*.05,W*.94,H*.23,W,H*.13);ctx.lineTo(W,H*.5);ctx.bezierCurveTo(W*.7,H*.61,W*.35,H*.38,0,H*.52);ctx.closePath();ctx.fill();
  // Місяць і далекі зорі.
@@ -637,6 +639,10 @@ function drawWinterEnvironment(){
  for(let side=0;side<2;side++){for(let k=0;k<5;k++){const x=side===0?8+k*17:W-8-k*17;const y=H*(.76+(k%3)*.075);pine(x,y,.58+(k%2)*.18);}}
  // Далека хатинка з теплим вікном.
  ctx.save();ctx.translate(W*.76,H*.72);ctx.globalAlpha=.7;ctx.fillStyle='#34566a';ctx.fillRect(-23,-22,46,30);ctx.beginPath();ctx.moveTo(-29,-22);ctx.lineTo(0,-44);ctx.lineTo(29,-22);ctx.closePath();ctx.fill();ctx.fillStyle='#ffe5a2';ctx.fillRect(-13,-13,9,10);ctx.fillRect(7,-13,9,10);ctx.fillStyle='#d9edf4';ctx.fillRect(12,-39,6,15);ctx.restore();
+ // М'які мазки туману та снігової імли, щоб пейзаж виглядав намальованим.
+ ctx.save();ctx.globalAlpha=.16;ctx.filter='blur(9px)';
+ for(let n=0;n<18;n++){const x=(n*71+par*.24)%W,y=H*(.22+(n%7)*.085);ctx.strokeStyle=n%2?'#e7f7fb':'#c4e4ee';ctx.lineWidth=5+(n%4)*3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-18,y);ctx.quadraticCurveTo(x,y-5,x+23,y+2);ctx.stroke();}
+ ctx.restore();ctx.filter='none';
  // Нижній сніговий пагорб.
  const snow=ctx.createLinearGradient(0,H*.79,0,H);snow.addColorStop(0,'#e8f6fb55');snow.addColorStop(1,'#f8fdffcc');ctx.fillStyle=snow;ctx.beginPath();ctx.moveTo(0,H*.86);ctx.quadraticCurveTo(W*.28,H*.78,W*.52,H*.87);ctx.quadraticCurveTo(W*.78,H*.95,W,H*.83);ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
  ctx.restore();
@@ -646,6 +652,8 @@ if(!winterTheme){ctx.lineWidth=.7;ctx.strokeStyle='#aec8d34a';ctx.beginPath();fo
 function drawLevelLandscape(id){
  const par=(camera*.045)%W, glow=(Math.sin(time*.7)+1)*.5;
  ctx.save();
+ // Напівпрозора живописна атмосфера: пейзаж не сперечається з платформами.
+ ctx.globalAlpha=.66;
  const hill=(base,amp,color,phase)=>{ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,H);for(let x=0;x<=W+8;x+=8){const y=base-Math.sin((x+phase+par*.3)*.009)*amp-Math.sin((x+phase)*.021)*amp*.22;ctx.lineTo(x,y);}ctx.lineTo(W,H);ctx.closePath();ctx.fill();};
  const orb=(x,y,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();};
  // Атмосферні шари кожного світу: небо, небесне світило та далекі силуети.
@@ -682,6 +690,10 @@ function drawLevelLandscape(id){
   ctx.strokeStyle='#ffb35e';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(W*.69,H*.27);ctx.lineTo(W*.65,H*.46);ctx.lineTo(W*.73,H*.6);ctx.lineTo(W*.67,H*.82);ctx.stroke();
   ctx.globalAlpha=.6;for(let n=0;n<12;n++){const x=(n*61+par*.3)%W,y=(n*97+time*8)%(H*.72);orb(x,y,1.5+(n%3),n%2?'#ffcf79':'#ff805e');}ctx.globalAlpha=1;
  }
+ // Тонкі нерівні мазки й розсіяні світлові плями замість жорстких векторних контурів.
+ ctx.save();ctx.globalAlpha=.14;ctx.filter='blur(8px)';ctx.lineCap='round';
+ for(let n=0;n<30;n++){const x=(n*53+par*.17)%W,y=H*(.25+(n%9)*.065);ctx.strokeStyle=id==='level_volcano'?(n%2?'#ffbd83':'#6d5366'):id==='level_desert'?(n%2?'#fff0c6':'#d99d69'):id==='level_candy'?(n%2?'#fff0f7':'#e5a8d0'):(n%2?'#f1f5c9':'#9bc9a6');ctx.lineWidth=4+(n%5)*2;ctx.beginPath();ctx.moveTo(x-15,y);ctx.quadraticCurveTo(x,y-4,x+19,y+2);ctx.stroke();}
+ ctx.restore();ctx.filter='none';
  // soft atmospheric haze over the distant landscape
  const haze=ctx.createLinearGradient(0,H*.48,0,H);haze.addColorStop(0,'#ffffff00');haze.addColorStop(1,id==='level_volcano'?'#ffb17b18':'#fff8df30');ctx.fillStyle=haze;ctx.fillRect(0,H*.45,W,H*.55);
  ctx.restore();
@@ -717,7 +729,7 @@ function drawLevelHolidayArt(){
  ctx.restore();
 }
 
-if(!winterTheme&&LEVEL_THEMES[selectedLevelId]){drawLevelLandscape(selectedLevelId);drawLevelHolidayArt();}path([[39,0],[39,H]],winterTheme?'#d8a7ad25':'#da9c9c35',1);for(let y=off+26;y<H;y+=156)ellipse(16,y,4,4,winterTheme?'#d2e8ef':'#deddd4',null);
+if(!winterTheme&&LEVEL_THEMES[selectedLevelId])drawLevelLandscape(selectedLevelId);path([[39,0],[39,H]],winterTheme?'#d8a7ad25':'#da9c9c35',1);for(let y=off+26;y<H;y+=156)ellipse(16,y,4,4,winterTheme?'#d2e8ef':'#deddd4',null);
 if(winterTheme){ctx.fillStyle='#ffffff';for(const f of snowSeed){const x=(f.x+Math.sin(time*.7+f.phase)*15+W)%W,y=(f.y+time*f.s-camera*.08)%(H+20);ctx.globalAlpha=.24+(f.r*.035);ctx.beginPath();ctx.arc(x,y,f.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;ctx.save();const gy=H*.145+((camera*.018)%18);ctx.beginPath();ctx.moveTo(0,gy-3);ctx.quadraticCurveTo(W*.5,gy+34,W,gy-3);ctx.strokeStyle='#263d5740';ctx.lineWidth=1.2;ctx.stroke();for(let gx=14;gx<W;gx+=48){const t=gx/W;const by=gy-3+Math.sin(t*Math.PI)*34;const pulse=.78+.22*Math.sin(time*3+gx);ctx.globalAlpha=pulse;ctx.fillStyle='#fff0bd';ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(gx,by+5,1.8,0,Math.PI*2);ctx.fill();}ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();}
 if(player.invert>0){ctx.fillStyle='#a47bcc10';ctx.fillRect(0,0,W,H);for(let i=0;i<7;i++){const x=57+i*55,y=((time*-80+i*113)%H+H)%H;path([[x-6,y+7],[x,y],[x+6,y+7]],'#986ecb44',2);path([[x,y],[x,y+25]],'#986ecb44',2);}}
 ctx.save();if(shake>0)ctx.translate(rand(-1,1)*shake*16,rand(-1,1)*shake*16);const mark=Math.floor(-camera/1000);text('сторінка '+Math.max(1,mark+1),W-16,H-28,10,'#82919c55','right');for(const q of platforms)drawPlatform(q);for(const e of enemies)drawEnemy(e);for(const b of bullets){const by=b.y-camera;if(by>-14&&by<H+14){path([[b.x,by+11],[b.x,by]],'#d29f39',3);ellipse(b.x,by,3,5,'#ffe09a',INK,1);}}for(const v of particles){const py=v.y-camera;if(py>-8&&py<H+8&&v.x>-8&&v.x<W+8){ctx.globalAlpha=clamp(v.life/.5,0,1);ctx.fillStyle=v.color;ctx.fillRect(v.x,py,v.size,v.size);}}ctx.globalAlpha=1;drawPlayer();if(player.x<25)drawPlayer(W);if(player.x>W-25)drawPlayer(-W);drawMultiplayerGhosts();for(const t of texts){const ty=t.y-camera;if(ty>-24&&ty<H+24){ctx.globalAlpha=Math.min(1,t.life*2);text(t.text,clamp(t.x,110,W-110),ty,12,t.color);}}ctx.globalAlpha=1;ctx.restore();if(flash>0){ctx.globalAlpha=flash;ctx.fillStyle=flashColor;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}}
