@@ -178,6 +178,34 @@ body.winter #levelProgress{background:linear-gradient(180deg,#29495def,#172e40ed
 #levelProgress{left:104px!important;right:auto!important;top:calc(env(safe-area-inset-top) + 10px)!important;transform:none!important;opacity:.66!important}
 #levelProgress .levelEmblem{opacity:.82!important}
 @media(max-width:360px){#levelProgress{left:94px!important;top:calc(env(safe-area-inset-top) + 9px)!important}}
+
+/* Doodle Jump-style badge: progress is ONLY the thin ring around the medal */
+#levelProgress{
+  position:absolute!important;left:104px!important;right:auto!important;
+  top:calc(env(safe-area-inset-top) + 9px)!important;transform:none!important;
+  width:48px!important;height:48px!important;min-width:48px!important;
+  box-sizing:border-box!important;padding:4px!important;margin:0!important;
+  display:grid!important;place-items:center!important;border:0!important;
+  border-radius:50%!important;
+  background:conic-gradient(from -90deg,#a8e34a 0 calc(var(--level-pct,0)*1%),#f4edcf55 calc(var(--level-pct,0)*1%) 100%)!important;
+  box-shadow:none!important;opacity:.9!important;pointer-events:none!important;
+}
+#levelProgress .levelTop{
+  width:40px!important;height:40px!important;display:grid!important;
+  place-items:center!important;gap:0!important;border-radius:50%!important;
+  background:#fff4c9!important;border:2px solid #59472d!important;
+  box-shadow:inset 0 2px 0 #fff,0 2px 0 #59472d!important;
+}
+#levelProgress .levelEmblem{
+  width:32px!important;height:32px!important;border:2px solid #59472d!important;
+  border-radius:50%!important;display:grid!important;place-items:center!important;
+  background:radial-gradient(circle at 35% 25%,#faff9a 0 12%,#c5ef55 34%,#76c83d 72%,#4b9a32 100%)!important;
+  color:#fff!important;font-family:Georgia,serif!important;font-size:21px!important;
+  font-weight:900!important;line-height:1!important;text-shadow:1px 2px 0 #477b2b,0 0 2px #477b2b!important;
+  box-shadow:inset 0 2px 2px #ffffffaa,0 1px 0 #fff!important;
+}
+#levelProgress #levelName,#levelProgress .levelTrack,#levelProgress .levelMeta{display:none!important}
+@media(max-width:360px){#levelProgress{left:94px!important;width:44px!important;height:44px!important;min-width:44px!important;padding:3px!important}#levelProgress .levelTop{width:38px!important;height:38px!important}#levelProgress .levelEmblem{width:30px!important;height:30px!important}}
 </style></head><body><main id="app"><canvas id="game" aria-label="Нахил або дотики ліворуч і праворуч — рух, угорі — постріл"></canvas><div id="levelProgress" class="tier0"><div class="levelTop"><span class="levelEmblem">♜</span><span id="levelName">ДО РІВНЯ 1</span></div><div class="levelTrack"><div class="levelFill" id="levelFill"></div></div><div class="levelMeta"><span id="levelPoints">0 / 1000 очок</span><span id="levelPercent">0%</span></div></div><div id="hud" class="hidden"><div><div id="score">0</div><div id="best">РЕКОРД 0</div></div><div class="buttons"><button id="sound" aria-label="Увімкнути або вимкнути звук">♪</button><button id="pause" aria-label="Пауза">Ⅱ</button></div></div><div id="effects"></div><div id="hint" class="hidden">← ДОТИК / НАХИЛ → · УГОРІ — ПОСТРІЛ</div><div id="toast" class="hidden" role="status"></div>
 <section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="levelWidget" id="menuLevel"><div class="levelTop"><span class="levelEmblem">♜</span><span class="levelName">ДО РІВНЯ 1</span></div><div class="levelTrack"><div class="levelFill"></div></div><div class="levelMeta"><span class="levelPoints">0 / 1000 очок</span><span class="levelPercent">0%</span></div></div><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button><button id="shopBtn" class="small wide">🎨 Магазин скінів</button></div><button id="start" class="primary wide">Почати ↑</button><button id="mpBtn" class="wide">👥 Грати разом · до 5 гравців</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
 <section id="mpModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">РАЗОМ В ОДНОМУ НЕБІ</div><h2>👥 Мультиплеєр</h2><p class="footnote">Кожен грає у своєму світі, але бачить висоту та рух інших гравців. До 5 учасників.</p><button id="mpCreate" class="primary wide">＋ Створити відкриту гру</button><div id="mpStatus" class="footnote">Відкриті ігри з’являються тут автоматично. Натисни «Підключитися» — жодних кодів не потрібно.</div><div id="mpRoomList" class="mpRoomList"><div class="footnote">Шукаємо відкриті ігри…</div></div><div id="mpRoomInfo" class="hidden"><div id="mpRoomCode" class="hidden"></div><div id="mpPlayers" class="footnote"></div><button id="mpLeave" class="small wide">Вийти з гри</button></div><button id="mpClose" class="wide">Назад</button></div></section>
