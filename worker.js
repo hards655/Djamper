@@ -93,7 +93,15 @@ export default {
     return json({ok:true},200,origin);
    }
 
-   // WebRTC signaling only: game-state traffic stays on direct peer connections.
+   if(url.pathname==='/api/mp/rooms' && request.method==='GET'){
+    const actor=await currentPlayer(request,env);
+    if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
+    await env.DB.prepare("CREATE TABLE IF NOT EXISTS mp_rooms (room_code TEXT PRIMARY KEY, host_telegram_id TEXT NOT NULL, host_name TEXT NOT NULL, mode TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+    const rows=await env.DB.prepare("SELECT room_code,host_name,mode,created_at,1 AS players FROM mp_rooms WHERE updated_at >= datetime('now','-75 seconds') ORDER BY created_at DESC LIMIT 30").all();
+    return json({rooms:rows.results||[]},200,origin);
+   }
+
+   // Public room discovery, while the actual game channel remains authenticated.
    const roomMatch=url.pathname.match(/^\/api\/mp\/signal\/([A-Z0-9]{6})$/);
    if(roomMatch && request.headers.get('Upgrade')?.toLowerCase()==='websocket'){
     const token=url.searchParams.get('token')||'';
@@ -106,6 +114,10 @@ export default {
     if(!['host','client'].includes(role)) return json({error:'Некоректна роль кімнати'},400,origin);
     if(role==='host'&&!['p2p','server'].includes(requestedMode)) return json({error:'Некоректний режим кімнати'},400,origin);
     const name=[actor.first_name,actor.last_name].filter(Boolean).join(' ')||actor.username||'Гравець';
+    if(role==='host'){
+     await env.DB.prepare("CREATE TABLE IF NOT EXISTS mp_rooms (room_code TEXT PRIMARY KEY, host_telegram_id TEXT NOT NULL, host_name TEXT NOT NULL, mode TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+     await env.DB.prepare('INSERT OR REPLACE INTO mp_rooms(room_code,host_telegram_id,host_name,mode,created_at,updated_at) VALUES(?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)').bind(roomMatch[1],String(actor.telegram_id),name.slice(0,48),requestedMode).run();
+    }
     const id=env.ROOMS.idFromName(roomMatch[1]);
     const stub=env.ROOMS.get(id);
     const target=new URL(request.url);
@@ -239,7 +251,7 @@ export class MultiplayerRoom {
   const mode=role==='host'?requestedMode:host.mode;
   if(!['p2p','server'].includes(mode)) return new Response('Invalid room mode',{status:400});
   const pair=new WebSocketPair(),client=pair[0],server=pair[1];
-  server.serializeAttachment({peer,role,name,mode,state:null});
+  server.serializeAttachment({peer,role,name,mode,state:null,roomCode:url.pathname.split('/').pop()});
   this.ctx.acceptWebSocket(server);
   const current=[...members,{peer,role,name}];
   this.send(server,{type:'welcome',self:peer,role,mode,players:current.map(({peer,role,name})=>({peer,role,name}))});
@@ -252,6 +264,9 @@ export class MultiplayerRoom {
   if(typeof raw!=='string'||raw.length>20000){try{ws.close(1009,'Message too large');}catch{}return;}
   let msg;try{msg=JSON.parse(raw);}catch{return;}
   const sender=ws.deserializeAttachment();if(!sender)return;
+  if(msg.type==='heartbeat'&&sender.role==='host'){
+   this.env.DB.prepare("UPDATE mp_rooms SET updated_at=CURRENT_TIMESTAMP WHERE room_code=?").bind(sender.roomCode).run().catch(()=>{});return;
+  }
   if(msg.type==='state'&&sender.mode==='server'){
    if(!msg.state||typeof msg.state!=='object'||JSON.stringify(msg.state).length>3000)return;
    this.broadcast({type:'player-state',peer:sender.peer,state:msg.state},ws);return;
@@ -268,9 +283,10 @@ export class MultiplayerRoom {
   if(msg.signalType==='answer'&&sender.role!=='client')return;
   this.send(recipient,{type:'signal',from:sender.peer,signalType:msg.signalType,data:msg.data});
  }
- webSocketClose(ws,code,reason,wasClean){
+ async webSocketClose(ws,code,reason,wasClean){
   const meta=ws.deserializeAttachment();if(!meta)return;
   if(meta.role==='host'){
+   await this.env.DB.prepare('DELETE FROM mp_rooms WHERE room_code=?').bind(meta.roomCode).run().catch(()=>{});
    for(const other of this.ctx.getWebSockets()){try{other.close(1000,'Host left');}catch{}}
    return;
   }
