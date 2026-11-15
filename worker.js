@@ -41,6 +41,10 @@ async function verifyTelegram(env, initData){
 }
 
 const SKINS=[{"id":"mint","name":"М’ятка","price":5},{"id":"ocean","name":"Океан","price":5},{"id":"sunset","name":"Захід","price":6},{"id":"lavender","name":"Лаванда","price":6},{"id":"flame","name":"Полум’я","price":7},{"id":"forest","name":"Лісовик","price":7},{"id":"galaxy","name":"Космос","price":8},{"id":"neon","name":"Неон","price":8},{"id":"rainbow","name":"Веселка","price":10},{"id":"crown","name":"Королівський","price":50},{"id":"admin","name":"Адмінський","price":2000},{"id":"creator","name":"Скін творця","price":10000},{"id":"glass","name":"Кристал","price":25},{"id":"robot","name":"Робот","price":5},{"id":"ninja","name":"Ніндзя","price":6},{"id":"alien","name":"Прибулець","price":7},{"id":"pirate","name":"Пірат","price":8},{"id":"knight","name":"Лицар","price":9},{"id":"panda","name":"Панда","price":5},{"id":"fox","name":"Лисичка","price":6},{"id":"astronaut","name":"Космонавт","price":10},{"id":"slime","name":"Слайм","price":7},{"id":"dragon","name":"Дракончик","price":10},{"id":"skeleton","name":"Скелет","price":150},{"id":"santa","name":"Дід Мороз","price":200},{"id":"saint","name":"Св. Миколай","price":150},{"id":"kapitoshka","name":"Капітошка","price":20},{"id":"lich","name":"Ліч — Жнець","price":250},{"id":"level_forest","name":"Смарагдовий ліс","price":150},{"id":"level_desert","name":"Золоті дюни","price":150},{"id":"level_candy","name":"Цукровий світ","price":150},{"id":"level_volcano","name":"Вулканічний край","price":150}];
+async function ensureScoreAudit(env){
+  try{await env.DB.prepare('ALTER TABLE players ADD COLUMN legit_best_score INTEGER').run();}catch(e){}
+  await env.DB.prepare('UPDATE players SET legit_best_score=COALESCE(legit_best_score,best_score,0) WHERE legit_best_score IS NULL').run();
+}
 async function ensureShopTables(env){
  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_skins (telegram_id TEXT NOT NULL, skin_id TEXT NOT NULL, purchased_at TEXT DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (telegram_id,skin_id))").run();
  await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_skin_selection (telegram_id TEXT PRIMARY KEY, skin_id TEXT NOT NULL DEFAULT 'default', updated_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
@@ -202,16 +206,36 @@ export default {
     const player=await currentPlayer(request,env); if(!player)return json({error:'Потрібно увійти через Telegram'},401,origin);
     const body=await request.json(), score=Number(body.score);
     if(!Number.isSafeInteger(score)||score<0||score>10000000) return json({error:'Некоректний результат'},400,origin);
-    await env.DB.prepare(`UPDATE players SET best_score=MAX(best_score,?),games=games+1,updated_at=CURRENT_TIMESTAMP WHERE telegram_id=?`).bind(score,player.telegram_id).run();
+    await ensureScoreAudit(env);
+    await env.DB.prepare(`UPDATE players SET best_score=MAX(best_score,?),legit_best_score=MAX(COALESCE(legit_best_score,0),?),games=games+1,updated_at=CURRENT_TIMESTAMP WHERE telegram_id=?`).bind(score,score,player.telegram_id).run();
     const row=await env.DB.prepare('SELECT best_score FROM players WHERE telegram_id=?').bind(player.telegram_id).first();
     return json({ok:true,best:row?.best_score||0},200,origin);
    }
    if(url.pathname==='/api/admin/players' && request.method==='GET'){
     const actor=await currentPlayer(request,env);
     if(!actor || actor.role!=='creator') return json({error:'Ця панель доступна лише творцю гри'},403,origin);
-    const rows=await env.DB.prepare(`SELECT telegram_id,username,first_name,last_name,role
+    await ensureScoreAudit(env);
+    const rows=await env.DB.prepare(`SELECT telegram_id,username,first_name,last_name,role,best_score,legit_best_score
       FROM players ORDER BY CASE role WHEN 'creator' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END, first_name COLLATE NOCASE`).all();
     return json({players:rows.results},200,origin);
+   }
+   if(url.pathname==='/api/admin/score' && request.method==='POST'){
+    const actor=await currentPlayer(request,env);
+    if(!actor || actor.role!=='creator') return json({error:'Змінювати очки може лише творець'},403,origin);
+    const body=await request.json(),target=String(body.telegram_id||''),action=body.action;
+    if(!/^\\d{1,24}$/.test(target) || !['set','restore'].includes(action)) return json({error:'Некоректний гравець або дія'},400,origin);
+    await ensureScoreAudit(env);
+    let result;
+    if(action==='set'){
+      const score=Number(body.score);
+      if(!Number.isSafeInteger(score)||score<0||score>10000000) return json({error:'Очки мають бути цілим числом від 0 до 10 000 000'},400,origin);
+      result=await env.DB.prepare('UPDATE players SET best_score=?,updated_at=CURRENT_TIMESTAMP WHERE telegram_id=?').bind(score,target).run();
+    }else{
+      result=await env.DB.prepare('UPDATE players SET best_score=COALESCE(legit_best_score,0),updated_at=CURRENT_TIMESTAMP WHERE telegram_id=?').bind(target).run();
+    }
+    if(!result.meta || result.meta.changes===0) return json({error:'Гравця не знайдено'},404,origin);
+    const row=await env.DB.prepare('SELECT best_score,legit_best_score FROM players WHERE telegram_id=?').bind(target).first();
+    return json({ok:true,best:row.best_score||0,legitBest:row.legit_best_score||0},200,origin);
    }
    if(url.pathname==='/api/admin/role' && request.method==='POST'){
     const actor=await currentPlayer(request,env);
