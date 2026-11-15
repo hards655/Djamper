@@ -223,9 +223,13 @@ export default {
     const actor=await currentPlayer(request,env);
     if(!actor || actor.role!=='creator') return json({error:'Змінювати очки може лише творець'},403,origin);
     const body=await request.json(),target=String(body.telegram_id||''),action=body.action;
-    if(!/^\d{1,24}$/.test(target) || !['set','restore'].includes(action)) return json({error:'Некоректний гравець або дія'},400,origin);
+    if((!/^\d{1,24}$/.test(target) && action!=='restore_all') || !['set','restore','restore_all'].includes(action)) return json({error:'Некоректний гравець або дія'},400,origin);
     await ensureScoreAudit(env);
     let result;
+    if(action==='restore_all'){
+      result=await env.DB.prepare('UPDATE players SET best_score=COALESCE(legit_best_score,0),updated_at=CURRENT_TIMESTAMP').run();
+      return json({ok:true,restored:result.meta?.changes||0},200,origin);
+    }
     if(action==='set'){
       const score=Number(body.score);
       if(!Number.isSafeInteger(score)||score<0||score>10000000) return json({error:'Очки мають бути цілим числом від 0 до 10 000 000'},400,origin);
