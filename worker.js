@@ -158,15 +158,13 @@ export default {
    if(url.pathname==='/api/shop/me' && request.method==='GET'){
     const actor=await currentPlayer(request,env);if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
     await ensureShopTables(env);
-    // Творець і адміністратори отримують усі скіни без оплати.
-    if(actor.role==='creator'||actor.role==='admin'){
-      for(const skin of SKINS){
-        await env.DB.prepare('INSERT OR IGNORE INTO player_skins(telegram_id,skin_id) VALUES(?,?)').bind(actor.telegram_id,skin.id).run();
-      }
-    }
+    // Адмінський доступ тимчасовий: не записуємо безкоштовні предмети в постійну власність.
     const owned=await env.DB.prepare('SELECT skin_id FROM player_skins WHERE telegram_id=?').bind(actor.telegram_id).all();
+    const adminAccess=actor.role==='creator'||actor.role==='admin';
+    const ownedIds=owned.results.map(x=>x.skin_id);
+    if(adminAccess) for(const skin of SKINS) if(!ownedIds.includes(skin.id)) ownedIds.push(skin.id);
     const selected=await env.DB.prepare('SELECT skin_id FROM player_skin_selection WHERE telegram_id=?').bind(actor.telegram_id).first();
-    return json({skins:SKINS,owned:owned.results.map(x=>x.skin_id),selected:selected?.skin_id||'default'},200,origin);
+    return json({skins:SKINS,owned:ownedIds,adminAccess,selected:selected?.skin_id||'default'},200,origin);
    }
    if(url.pathname==='/api/shop/select' && request.method==='POST'){
     const actor=await currentPlayer(request,env);if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
@@ -174,7 +172,7 @@ export default {
     if(id!=='default'&&!SKINS.some(x=>x.id===id))return json({error:'Невідомий скін'},400,origin);
     if(id!=='default'){
       const owned=await env.DB.prepare('SELECT 1 AS ok FROM player_skins WHERE telegram_id=? AND skin_id=?').bind(actor.telegram_id,id).first();
-      if(!owned)return json({error:'Цей скін ще не куплений'},403,origin);
+      if(!owned && actor.role!=='creator' && actor.role!=='admin')return json({error:'Цей скін ще не куплений'},403,origin);
     }
     await env.DB.prepare("INSERT INTO player_skin_selection(telegram_id,skin_id) VALUES(?,?) ON CONFLICT(telegram_id) DO UPDATE SET skin_id=excluded.skin_id,updated_at=CURRENT_TIMESTAMP").bind(actor.telegram_id,id).run();
     return json({ok:true,selected:id},200,origin);
