@@ -822,7 +822,7 @@ async function mpRefreshRooms(){
   const res=await fetch(API_BASE+'/api/mp/rooms',{headers:apiHeaders()});
   const data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити ігри');
   const rooms=(data.rooms||[]).filter(r=>r.room_code!==mpRoom);
-  $('mpRoomList').innerHTML=rooms.length?rooms.map(r=>'<div class="mpRoomItem"><div><b>'+escapeHtml(r.host_name||'Гравець')+'</b><small>'+(r.mode==='server'?'☁ Серверна гра':'⚡ P2P')+' · '+Number(r.players||1)+'/5 гравців</small></div><button class="small" data-room="'+escapeHtml(r.room_code)+'">Підключитися</button></div>').join(''):'<div class="footnote">Зараз немає відкритих ігор. Створи нову — і вона з’явиться тут у всіх.</div>';
+  $('mpRoomList').innerHTML=rooms.length?rooms.map(r=>'<div class="mpRoomItem"><div><b>'+escapeHtml(r.host_name||'Гравець')+'</b><small>'+(r.mode==='server'?'☁ Серверна гра':'⚡ P2P')+' · відкрита для підключення</small></div><button class="small" data-room="'+escapeHtml(r.room_code)+'">Підключитися</button></div>').join(''):'<div class="footnote">Зараз немає відкритих ігор. Створи нову — і вона з’явиться тут у всіх.</div>';
   $('mpRoomList').querySelectorAll('button[data-room]').forEach(b=>b.onclick=()=>mpConnect(b.dataset.room,'client','auto'));
  }catch(e){$('mpRoomList').innerHTML='<div class="footnote">'+escapeHtml(e.message)+'</div>';}
 }
