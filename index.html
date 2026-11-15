@@ -923,7 +923,7 @@ async function authenticateMiniApp(){
   $('accountStatus').textContent='Перевіряємо Telegram-профіль…';
   const res=await fetch(API_BASE+'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:tg.initData})});
   const data=await res.json();if(!res.ok)throw new Error(data.error||'Помилка входу');
-  gameSession=data;localStorage.setItem(SESSION_KEY,JSON.stringify(gameSession));setAccountUI();
+  gameSession=data;localStorage.setItem(SESSION_KEY,JSON.stringify(gameSession));if(data.user&&Number.isFinite(Number(data.user.best_score))){best=Number(data.user.best_score)||0;try{localStorage.setItem('notebook-jump-best-v1',String(best));}catch(e){}updateHUD();}setAccountUI();
  }catch(e){gameSession=null;localStorage.removeItem(SESSION_KEY);$('accountStatus').textContent='Не вдалося увійти: '+e.message;}
 }
 async function submitOnlineScore(value){
