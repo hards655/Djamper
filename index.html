@@ -65,7 +65,7 @@ button.primary:active{box-shadow:0 1px 0 #527d43}
 .badge{background:#fffdf2;border:1.5px solid #527d43;color:#365b40;border-radius:5px;font-family:"Kalam",cursive}
 #hint{color:#527d43;font-family:"Kalam",cursive;font-weight:700}
 #toast{background:#31563e;color:#fffdf2;border:2px solid #a8d878;border-radius:8px;font-family:"Kalam",cursive}
-.overlay{background:rgba(237,239,225,.84);backdrop-filter:blur(2px)}
+.overlay{background:rgba(237,239,225,.84);backdrop-filter:blur(2px)}.modalClose{position:absolute;top:8px;right:9px;z-index:5;width:36px;height:36px;min-width:36px;padding:0;border-radius:50%;font:700 27px/1 system-ui,sans-serif;background:#fffdf2;color:#365b40;border:2px solid #78966d;box-shadow:0 2px 0 #78966d;display:flex;align-items:center;justify-content:center}.modalClose:active{transform:scale(.94);box-shadow:0 1px 0 #78966d}
 .card{position:relative;width:100%;max-width:410px;padding:17px 17px 20px;background:rgba(255,253,242,.96);border:2px solid #78966d;border-radius:5px 13px 8px 12px;box-shadow:5px 6px 0 rgba(67,100,64,.16);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(122,164,187,.16) 32px,transparent 33px)}
 .eyebrow{font-family:"Kalam",cursive;font-size:14px;letter-spacing:2px;color:#638c4c;margin:0 0 8px}
 h1,h2{font-family:"Kalam","Comic Sans MS",cursive;color:#294b3a;font-weight:700;letter-spacing:-1px;transform:none}
@@ -172,6 +172,13 @@ function tone(freq=500,dur=.09,type='sine',volume=.045,end=freq*1.3){if(muted||!
 function soundUI(){$('sound').textContent=muted?'×♪':'♪';}soundUI();
 function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');toastTime=4;}
 function show(id,v){$(id).classList.toggle('hidden',!v);}
+function installModalCloseButtons(){
+ const ids=['mpModal','instructionModal','pauseMenu','over','leaderboardModal','shopModal','adminModal'];
+ for(const id of ids){const root=$(id),card=root?.querySelector('.card');if(!root||!card||card.querySelector('.modalClose'))continue;
+  const btn=document.createElement('button');btn.type='button';btn.className='modalClose';btn.textContent='×';btn.setAttribute('aria-label','Закрити');
+  btn.onclick=()=>{if(id==='mpModal')$('mpClose').click();else if(id==='pauseMenu')resume();else if(id==='over')home();else show(id,false);};card.appendChild(btn);
+ }
+}
 function applyTheme(){document.body.classList.toggle('winter',winterTheme);$('themeToggle').textContent=winterTheme?'☀ Звичайна тема':'❄ Зимова тема';try{localStorage.setItem('notebook-jump-theme-v1',winterTheme?'winter':'normal');}catch(e){}}
 function toggleTheme(){winterTheme=!winterTheme;applyTheme();tone(winterTheme?740:480,.12,'sine');}
 function clearInput(){pointers.clear();keys.clear();}
@@ -598,7 +605,7 @@ for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addE
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','KeyA','KeyD','Space','KeyP','Escape'].includes(e.code)){if(mode!=='playing'&&e.target instanceof HTMLButtonElement&&e.code==='Space')return;e.preventDefault();if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){if(mode==='playing')pause();else if(mode==='paused')resume();return;}if(mode==='playing'){keys.add(e.code);if(e.code==='Space')shoot();}}});window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{clearInput();pause();});document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();saveBest();}last=performance.now();acc=0;});window.addEventListener('pagehide',saveBest);
-applyTheme();$('themeToggle').onclick=toggleTheme;$('instructionsBtn').onclick=()=>show('instructionModal',true);$('closeInstructions').onclick=()=>show('instructionModal',false);$('instructionModal').addEventListener('click',e=>{if(e.target===$('instructionModal'))show('instructionModal',false);});$('themePause').onclick=toggleTheme;$('start').onclick=begin;$('again').onclick=begin;$('restartPause').onclick=()=>{saveBest();begin();};$('pause').onclick=pause;$('resume').onclick=resume;$('home').onclick=home;$('homePause').onclick=home;$('tilt').onclick=enableTilt;$('calibrate').onclick=calibrate;$('fullscreen').onclick=fullscreen;$('full2').onclick=fullscreen;$('sound').onclick=()=>{initAudio();muted=!muted;soundUI();try{localStorage.setItem('notebook-jump-muted-v1',String(muted?1:0));}catch(e){}if(!muted)tone(600,.1);};
+installModalCloseButtons();applyTheme();$('themeToggle').onclick=toggleTheme;$('instructionsBtn').onclick=()=>show('instructionModal',true);$('closeInstructions').onclick=()=>show('instructionModal',false);$('instructionModal').addEventListener('click',e=>{if(e.target===$('instructionModal'))show('instructionModal',false);});$('themePause').onclick=toggleTheme;$('start').onclick=begin;$('again').onclick=begin;$('restartPause').onclick=()=>{saveBest();begin();};$('pause').onclick=pause;$('resume').onclick=resume;$('home').onclick=home;$('homePause').onclick=home;$('tilt').onclick=enableTilt;$('calibrate').onclick=calibrate;$('fullscreen').onclick=fullscreen;$('full2').onclick=fullscreen;$('sound').onclick=()=>{initAudio();muted=!muted;soundUI();try{localStorage.setItem('notebook-jump-muted-v1',String(muted?1:0));}catch(e){}if(!muted)tone(600,.1);};
 // Фіксована фізика 120 Гц; рендеринг обмежено 60 кадрами/с для стабільнішого навантаження.
 // Зменшуємо роздільність полотна на мобільних екранах і обмежуємо стрибки часу кадру.
 const FRAME_MS=1000/60;
