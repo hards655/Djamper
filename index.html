@@ -228,7 +228,7 @@ body.winter #levelProgress{background:linear-gradient(180deg,#29495def,#172e40ed
   <div class="card leaderboardCard">
     <div class="eyebrow">ПАНЕЛЬ ТВОРЦЯ</div><h2>⚙ Керування ролями</h2>
     <div id="adminStatus" class="footnote">Завантаження гравців…</div>
-    <div class="tableWrap"><table><thead><tr><th>Гравець</th><th>Telegram ID</th><th>Роль</th><th>Дія</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+    <div class="tableWrap"><table><thead><tr><th>Гравець</th><th>Telegram ID</th><th>Роль</th><th>Очки</th><th>Роль</th><th>Керування очками</th></tr></thead><tbody id="adminRows"></tbody></table></div>
     <p class="footnote">Лише творець може призначати та знімати адміністраторів. Роль творця захищена.</p>
     <button id="closeAdmin" class="primary wide">Готово</button>
   </div>
@@ -1092,10 +1092,28 @@ async function showAdminPanel(){
   $('adminRows').innerHTML=data.players.map(p=>{
    const name=[p.first_name,p.last_name].filter(Boolean).join(' ')||p.username||'Гравець',role=p.role||'player';
    const label=role==='creator'?'Творець':role==='admin'?'Зняти адміна':'Зробити адміном';
-   return '<tr><td>'+escapeHtml(name)+(p.username?' <small>@'+escapeHtml(p.username)+'</small>':'')+'</td><td class="adminId">'+escapeHtml(p.telegram_id)+'</td><td>'+roleLabel(role)+'</td><td><button class="adminAction" data-id="'+escapeHtml(p.telegram_id)+'" data-role="'+(role==='admin'?'player':'admin')+'"'+(role==='creator'?' disabled':'')+'>'+label+'</button></td></tr>';
+   return '<tr><td>'+escapeHtml(name)+(p.username?' <small>@'+escapeHtml(p.username)+'</small>':'')+'</td><td class="adminId">'+escapeHtml(p.telegram_id)+'</td><td>'+roleLabel(role)+'</td><td><b>'+Number(p.best_score||0).toLocaleString('uk-UA')+'</b><small style="display:block">Чесний рекорд: '+Number(p.legit_best_score||0).toLocaleString('uk-UA')+'</small></td><td><button class="adminAction" data-id="'+escapeHtml(p.telegram_id)+'" data-role="'+(role==='admin'?'player':'admin')+'"'+(role==='creator'?' disabled':'')+'>'+label+'</button></td><td><button class="adminAction" data-score-id="'+escapeHtml(p.telegram_id)+'" data-score-action="set">✏️ Змінити</button> <button class="adminAction" data-score-id="'+escapeHtml(p.telegram_id)+'" data-score-action="restore">↩️ Скасувати накрутку</button></td></tr>';
   }).join('')||'<tr><td colspan="4">Поки що немає гравців</td></tr>';
   $('adminRows').querySelectorAll('button[data-id]').forEach(b=>b.addEventListener('click',()=>changeRole(b.dataset.id,b.dataset.role)));
+  $('adminRows').querySelectorAll('button[data-score-id]').forEach(b=>b.addEventListener('click',()=>changePlayerScore(b.dataset.scoreId,b.dataset.scoreAction)));
  }catch(e){$('adminStatus').textContent=e.message;}
+}
+async function changePlayerScore(id,action){
+ const row=[...$('adminRows').querySelectorAll('button[data-score-id]')].find(b=>b.dataset.scoreId===id)?.closest('tr');
+ const current=row?Number(row.querySelector('td:nth-child(4) b')?.textContent.replace(/\\D/g,''))||0:0;
+ let score;
+ if(action==='set'){
+  const raw=prompt('Введи нову кількість очок (0–10 000 000):',String(current));
+  if(raw===null)return;
+  score=Number(raw.trim());
+  if(!Number.isSafeInteger(score)||score<0||score>10000000){toast('Введи ціле число від 0 до 10 000 000');return;}
+  if(!confirm('Встановити гравцю '+score.toLocaleString('uk-UA')+' очок? Попередній чесний рекорд буде збережено окремо.'))return;
+ }else if(!confirm('Скасувати накрутку та повернути попередній чесний рекорд цього гравця?'))return;
+ try{
+  const res=await fetch(API_BASE+'/api/admin/score',{method:'POST',headers:apiHeaders(),body:JSON.stringify({telegram_id:id,action,score})});
+  const data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося змінити очки');
+  await showAdminPanel();toast(action==='restore'?'Повернуто чесний рекорд: '+Number(data.best).toLocaleString('uk-UA'):'Очки оновлено');
+ }catch(e){toast(e.message);}
 }
 async function changeRole(id,role){
  if(!confirm(role==='admin'?'Призначити цього гравця адміністратором?':'Зняти з цього гравця права адміністратора?'))return;
