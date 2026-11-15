@@ -942,7 +942,7 @@ async function loadShop(){
  if(!gameSession?.token){$('shopStatus').textContent='Спочатку відкрий гру через Telegram, щоб увійти.';return;}
  try{
   const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
-  ownedSkins=data.owned||[];selectedSkinId=data.selected||'default';applySelectedSkin();
+  ownedSkins=data.owned||[];shopAdminAccess=!!data.adminAccess;selectedSkinId=data.selected||'default';applySelectedSkin();
   $('shopStatus').textContent='Обраний персонаж: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId));
   renderShop();
  }catch(e){$('shopStatus').textContent=e.message;}
@@ -1006,7 +1006,7 @@ function renderShop(){
   $('skinGrid').innerHTML=items.map(level=>{
    const owned=ownedSkins.includes(level.id),active=level.themeMode?(winterTheme===(level.themeMode==='winter')):(!winterTheme&&selectedLevelId===level.id),t=LEVEL_THEMES[level.id];
    const themePreview=level.themeMode==='winter'?'<div class="levelPreview" style="background:linear-gradient(#9bd5eb,#eefaff)"><i></i><i></i><i></i><b>❄</b></div>':level.themeMode==='classic'?'<div class="levelPreview" style="background:linear-gradient(#dceef7,#faf7ed)"><i></i><i></i><i></i><b>📗</b></div>':'<div class="levelPreview '+t.pattern+'" style="--level-top:'+t.top+';--level-bottom:'+t.bottom+';--level-tile:'+t.tile+';--level-edge:'+t.edge+';--level-accent:'+t.accent+'"><i></i><i></i><i></i><b></b></div>';
-   return '<div class="skinItem exclusive levelItem">'+themePreview+'<strong>'+escapeHtml(level.name)+'</strong><small>'+(owned?'Куплено назавжди':level.price+' ⭐')+'</small><button data-level="'+level.id+'">'+(owned?(active?'Обрано':'Обрати'):'Купити')+'</button></div>';
+   return '<div class="skinItem exclusive levelItem">'+themePreview+'<strong>'+escapeHtml(level.name)+'</strong><small>'+(shopAdminAccess?'♛ Доступ адміна':owned?'Куплено назавжди':level.price+' ⭐')+'</small><button data-level="'+level.id+'">'+(shopAdminAccess?(active?'Обрано':'Обрати'):owned?(active?'Обрано':'Обрати'):'Купити')+'</button></div>';
   }).join('');
   $('skinGrid').querySelectorAll('button[data-level]').forEach(b=>b.onclick=()=>chooseLevel(b.dataset.level));
   document.querySelectorAll('[data-shop-tab]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.shopTab;document.querySelectorAll('[data-shop-tab]').forEach(x=>x.classList.toggle('active',x===b));renderShop();});
@@ -1017,7 +1017,7 @@ function renderShop(){
  const defaultCard=shopTab==='skins'?card({id:'default',color:'#b6df88',accent:'#739b57'},'Класичний','Безкоштовно',selectedSkinId==='default'?'Обрано':'Обрати',true,selectedSkinId==='default'):'';
  $('skinGrid').innerHTML=defaultCard+items.map(s=>{
   const owned=ownedSkins.includes(s.id),selected=selectedSkinId===s.id;
-  return card(s,s.name,owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''),selected?'Обрано':owned?'Обрати':'Купити',owned,selected);
+  return card(s,s.name,shopAdminAccess?'♛ Доступ адміна':owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''),selected?'Обрано':(owned||shopAdminAccess)?'Обрати':'Купити',owned||shopAdminAccess,selected);
  }).join('');
  $('skinGrid').querySelectorAll('button[data-skin]').forEach(b=>b.onclick=()=>chooseSkin(b.dataset.skin));
  document.querySelectorAll('[data-shop-tab]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.shopTab;document.querySelectorAll('[data-shop-tab]').forEach(x=>x.classList.toggle('active',x===b));renderShop();});
