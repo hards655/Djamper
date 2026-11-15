@@ -937,12 +937,15 @@ async function submitOnlineScore(value){
 }
 
 async function loadShop(){
- saveBest();if(selectedWeaponId!=='normal'&&!weaponUnlocked(selectedWeaponId)){selectedWeaponId='normal';try{localStorage.setItem('djamper-weapon-v1','normal');}catch(e){}}
+ saveBest();
  show('shopModal',true);shopTab='skins';document.querySelectorAll('[data-shop-tab]').forEach(b=>b.classList.toggle('active',b.dataset.shopTab===shopTab));$('paymentSetupBtn').classList.toggle('hidden',gameSession?.user?.role!=='creator');$('shopStatus').textContent='Завантажуємо скіни…';$('skinGrid').innerHTML='';
  if(!gameSession?.token){$('shopStatus').textContent='Спочатку відкрий гру через Telegram, щоб увійти.';return;}
  try{
   const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
+  if(gameSession?.user&&data.role)gameSession.user.role=data.role;
+  try{localStorage.setItem(SESSION_KEY,JSON.stringify(gameSession));}catch(e){}
   ownedSkins=data.owned||[];shopAdminAccess=!!data.adminAccess;selectedSkinId=data.selected||'default';applySelectedSkin();
+  if(selectedWeaponId!=='normal'&&!weaponUnlocked(selectedWeaponId)){selectedWeaponId='normal';try{localStorage.setItem('djamper-weapon-v1','normal');}catch(e){}}
   $('shopStatus').textContent='Обраний персонаж: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId));
   renderShop();
  }catch(e){$('shopStatus').textContent=e.message;}
