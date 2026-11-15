@@ -102,6 +102,21 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
 
 .shopTabs{display:flex;gap:8px;margin:10px 0 4px}.shopTab{flex:1;padding:9px 5px;border:1.5px solid #78966d;border-radius:9px;background:#edf4e8;font-weight:800}.shopTab.active{background:#365b40;color:#fff;border-color:#365b40}
 .skinGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;max-height:48vh;overflow:auto;padding:2px}
+.skinGrid{max-height:52vh;gap:11px;padding:3px}
+.skinItem{position:relative;overflow:hidden;padding:9px 8px 10px;border-radius:15px;background:linear-gradient(155deg,#fffef9,#edf5e8);box-shadow:0 3px 0 #78966d}
+.skinItem.exclusive{background:linear-gradient(155deg,#fff9e5,#f6e6b7)}
+.skinPortrait{height:128px;margin:-1px -2px 7px;display:flex;align-items:center;justify-content:center;position:relative;isolation:isolate;border-radius:12px;background:radial-gradient(ellipse at 50% 72%,#fff 0,transparent 58%),linear-gradient(180deg,#e8f4e8,#d8e9d8)}
+.skinPortrait:after{content:"";position:absolute;bottom:9px;width:62px;height:10px;border-radius:50%;background:#24395125;filter:blur(4px);z-index:-1}
+.skinPortrait img{height:124px;width:100%;object-fit:contain;filter:drop-shadow(0 5px 2px #24395120);animation:characterFloat 2.8s ease-in-out infinite;transform-origin:50% 88%}
+.skinItem:nth-child(2n) .skinPortrait img{animation-delay:-.8s}
+.skinItem:nth-child(3n) .skinPortrait img{animation-delay:-1.5s}
+@keyframes characterFloat{0%,100%{transform:translateY(2px) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1deg)}}
+.skinItem strong{font-size:16px}
+.skinItem small{min-height:19px}
+.skinItem button{border-radius:10px;background:#b4e587}
+.skinItem.exclusive button{background:#f5d36d}
+@media(prefers-reduced-motion:reduce){.skinPortrait img{animation:none}}
+
 .skinItem{border:1.5px solid #78966d;border-radius:9px;background:#fffdf6;padding:9px 6px;text-align:center;min-width:0}
 .skinSwatch{width:43px;height:43px;margin:0 auto 5px;border:2px solid #294b3a;border-radius:45% 45% 35% 35%;display:flex;align-items:center;justify-content:center;font-size:24px}
 .skinItem strong{display:block;font-size:16px}.skinItem small{display:block;font-size:13px;opacity:.75;margin:2px 0 6px}.skinItem button{width:100%;padding:6px 4px;font-size:14px}
@@ -623,17 +638,45 @@ async function loadShop(){
  try{
   const res=await fetch(API_BASE+'/api/shop/me',{headers:apiHeaders()}),data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити магазин');
   ownedSkins=data.owned||[];selectedSkinId=data.selected||'default';applySelectedSkin();
-  $('shopStatus').textContent='Твій скін: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId))+' · '+SKIN_CATALOG.length+' предметів у каталозі';
+  $('shopStatus').textContent='Обраний персонаж: '+(selectedSkinId==='default'?'Класичний':(SKIN_CATALOG.find(x=>x.id===selectedSkinId)?.name||selectedSkinId));
   renderShop();
  }catch(e){$('shopStatus').textContent=e.message;}
 }
 function applySelectedSkin(){selectedSkinId=selectedSkinId||'default';selectedSkin=SKIN_CATALOG.find(x=>x.id===selectedSkinId)||{id:'default',color:'#b6df88',accent:'#739b57'};}
+function characterArt(s){
+ const c=s?.color||'#b6df88',a=s?.accent||'#739b57',id=s?.id||'default';
+ const extras={
+  robot:'<rect x="72" y="48" width="16" height="9" rx="4" fill="#dce8ef"/><path d="M80 46V34" stroke="#526d83" stroke-width="4" stroke-linecap="round"/><circle cx="80" cy="31" r="5" fill="#ffcf65"/>',
+  ninja:'<path d="M40 63Q80 23 120 63L115 78H45Z" fill="#222a43"/><path d="M45 65Q80 77 115 65" stroke="#a7b5ff" stroke-width="5"/>',
+  alien:'<path d="M51 51Q80 25 109 51" fill="none" stroke="#d8ff8d" stroke-width="7"/>',
+  pirate:'<path d="M39 56Q80 20 121 56L113 63H47Z" fill="#46342d"/><path d="M80 26L91 49H69Z" fill="#f5d06b"/>',
+  knight:'<path d="M46 59L50 32L80 20L110 32L114 59L104 76H56Z" fill="#d5dce4" stroke="#64778b" stroke-width="4"/><path d="M58 52H102" stroke="#f1d38a" stroke-width="6"/>',
+  panda:'<circle cx="53" cy="42" r="15" fill="#30343b"/><circle cx="107" cy="42" r="15" fill="#30343b"/>',
+  fox:'<path d="M48 52L43 18L70 37L80 31L90 37L117 18L112 52Z" fill="#f39a4b"/><path d="M48 29L62 39L52 43Z M112 29L98 39L108 43Z" fill="#fff0c9"/>',
+  astronaut:'<path d="M42 59Q40 18 80 17Q120 18 118 59L107 79H53Z" fill="#f5fbff" stroke="#65bde8" stroke-width="5"/><rect x="51" y="37" width="58" height="30" rx="14" fill="#31546d"/>',
+  slime:'<path d="M43 70Q42 24 80 24Q118 24 117 70Q111 91 80 91Q49 91 43 70Z" fill="#baffdf" opacity=".8"/>',
+  dragon:'<path d="M48 55L31 29L61 39L80 25L99 39L129 29L112 59Z" fill="#4b9b65"/><path d="M70 24L80 7L90 24" fill="#f2b35c"/>',
+  skeleton:'<path d="M55 48Q80 25 105 48L100 78H60Z" fill="#f8f2df" stroke="#9b9ca8" stroke-width="3"/>',
+  santa:'<path d="M43 54Q51 16 80 18Q109 16 117 54Z" fill="#d9444c"/><path d="M43 54H117" stroke="#fff0df" stroke-width="10"/><circle cx="80" cy="16" r="9" fill="#fff"/>',
+  saint:'<path d="M43 51Q80 10 117 51" fill="none" stroke="#f5d36d" stroke-width="9"/>',
+  kapitoshka:'<path d="M80 14Q120 58 110 77Q103 96 80 96Q57 96 50 77Q40 58 80 14Z" fill="#b8edff" opacity=".75"/>',
+  lich:'<path d="M43 58L50 21L80 34L110 21L117 58L104 75H56Z" fill="#302a47"/><path d="M62 55L72 58M88 58L98 55" stroke="#a8e8c7" stroke-width="5"/>',
+  crown:'<path d="M48 45L42 19L65 34L80 12L95 34L118 19L112 45Z" fill="#f5d36d" stroke="#a7771d" stroke-width="3"/>',
+  admin:'<path d="M80 13L112 28V52Q107 78 80 91Q53 78 48 52V28Z" fill="#30313a" stroke="#d83a4b" stroke-width="5"/>',
+  creator:'<path d="M45 48H115V77H45Z" fill="#1688e8"/><path d="M45 77H115V88H45Z" fill="#ffd52a"/>',
+  glass:'<path d="M80 12L115 48L80 91L45 48Z" fill="#e9ffff" opacity=".7" stroke="#75d8ed" stroke-width="4"/>'
+ };
+ const accessory=extras[id]||'<path d="M48 51Q80 20 112 51" fill="none" stroke="'+a+'" stroke-width="8" stroke-linecap="round"/>';
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 170"><defs><linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".72"/><stop offset=".38" stop-color="'+c+'"/><stop offset="1" stop-color="'+a+'"/></linearGradient><radialGradient id="shine"><stop stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><ellipse cx="80" cy="147" rx="35" ry="8" fill="#243951" opacity=".12"/><path d="M49 112Q31 121 34 143Q45 153 63 137M111 112Q129 121 126 143Q115 153 97 137" fill="none" stroke="'+a+'" stroke-width="13" stroke-linecap="round"/><path d="M53 91Q80 80 107 91L116 139Q80 153 44 139Z" fill="url(#body)" stroke="'+a+'" stroke-width="3"/><path d="M62 136L60 153H76L80 139L84 153H100L98 136" fill="'+a+'" stroke="#fff" stroke-opacity=".55" stroke-width="3" stroke-linejoin="round"/><circle cx="80" cy="62" r="43" fill="url(#body)" stroke="'+a+'" stroke-width="3"/><ellipse cx="65" cy="45" rx="16" ry="22" fill="url(#shine)"/>'+accessory+'<ellipse cx="66" cy="68" rx="4.5" ry="6" fill="#243951"><animate attributeName="ry" values="6;6;0.5;6;6" keyTimes="0;0.42;0.46;0.5;1" dur="'+(3.2+(id.length%5)*.43)+'s" repeatCount="indefinite"/></ellipse><ellipse cx="94" cy="68" rx="4.5" ry="6" fill="#243951"><animate attributeName="ry" values="6;6;0.5;6;6" keyTimes="0;0.42;0.46;0.5;1" dur="'+(3.2+(id.length%5)*.43)+'s" repeatCount="indefinite"/></ellipse><path d="M70 83Q80 91 90 83" fill="none" stroke="#754b4b" stroke-width="3" stroke-linecap="round"/><circle cx="54" cy="80" r="7" fill="#ff9b9b" opacity=".35"/><circle cx="106" cy="80" r="7" fill="#ff9b9b" opacity=".35"/></svg>';
+ return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
 function renderShop(){
  const items=SKIN_CATALOG.filter(x=>(x.category||'skins')===shopTab);
- const defaultCard=shopTab==='skins'?'<div class="skinItem"><div class="skinSwatch" style="background:#b6df88">🙂</div><strong>Класичний</strong><small>Безкоштовно</small><button data-skin="default">'+(selectedSkinId==='default'?'Обрано':'Обрати')+'</button></div>':'';
+ const card=(skin,name,price,label,owned,selected)=>'<div class="skinItem '+(skin.exclusive?'exclusive':'')+'"><div class="skinPortrait"><img src="'+characterArt(skin)+'" alt="'+escapeHtml(name)+'" loading="lazy"></div><strong>'+escapeHtml(name)+'</strong><small>'+price+'</small><button data-skin="'+skin.id+'">'+label+'</button></div>';
+ const defaultCard=shopTab==='skins'?card({id:'default',color:'#b6df88',accent:'#739b57'},'Класичний','Безкоштовно',selectedSkinId==='default'?'Обрано':'Обрати',true,selectedSkinId==='default'):'';
  $('skinGrid').innerHTML=defaultCard+items.map(s=>{
- const owned=ownedSkins.includes(s.id),selected=selectedSkinId===s.id;
- return '<div class="skinItem '+(s.exclusive?'exclusive':'')+'"><div class="skinSwatch" style="background:'+s.color+';box-shadow:inset 0 -7px 0 '+s.accent+'">'+s.emoji+'</div><strong>'+escapeHtml(s.name)+'</strong><small>'+(owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''))+'</small><button data-skin="'+s.id+'">'+(selected?'Обрано':owned?'Обрати':'Купити')+'</button></div>';
+  const owned=ownedSkins.includes(s.id),selected=selectedSkinId===s.id;
+  return card(s,s.name,owned?'Куплено назавжди':s.price+' ⭐'+(s.exclusive?' · ЕКСКЛЮЗИВ':''),selected?'Обрано':owned?'Обрати':'Купити',owned,selected);
  }).join('');
  $('skinGrid').querySelectorAll('button[data-skin]').forEach(b=>b.onclick=()=>chooseSkin(b.dataset.skin));
  document.querySelectorAll('[data-shop-tab]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.shopTab;document.querySelectorAll('[data-shop-tab]').forEach(x=>x.classList.toggle('active',x===b));renderShop();});
