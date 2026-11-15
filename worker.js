@@ -159,12 +159,23 @@ export default {
     const actor=await currentPlayer(request,env);if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
     await ensureShopTables(env);
     // Адмінський доступ тимчасовий: не записуємо безкоштовні предмети в постійну власність.
-    const owned=await env.DB.prepare('SELECT skin_id FROM player_skins WHERE telegram_id=?').bind(actor.telegram_id).all();
     const adminAccess=actor.role==='creator'||actor.role==='admin';
+    // Remove legacy free admin grants, but preserve items backed by a successful Stars payment.
+    if(!adminAccess){
+      await env.DB.prepare(`DELETE FROM player_skins WHERE telegram_id=? AND NOT EXISTS (
+        SELECT 1 FROM skin_purchases p WHERE p.telegram_id=player_skins.telegram_id
+        AND p.skin_id=player_skins.skin_id AND p.status='paid'
+      )`).bind(actor.telegram_id).run();
+    }
+    const owned=await env.DB.prepare('SELECT skin_id FROM player_skins WHERE telegram_id=?').bind(actor.telegram_id).all();
     const ownedIds=owned.results.map(x=>x.skin_id);
     if(adminAccess) for(const skin of SKINS) if(!ownedIds.includes(skin.id)) ownedIds.push(skin.id);
-    const selected=await env.DB.prepare('SELECT skin_id FROM player_skin_selection WHERE telegram_id=?').bind(actor.telegram_id).first();
-    return json({skins:SKINS,owned:ownedIds,adminAccess,selected:selected?.skin_id||'default'},200,origin);
+    let selected=await env.DB.prepare('SELECT skin_id FROM player_skin_selection WHERE telegram_id=?').bind(actor.telegram_id).first();
+    if(selected?.skin_id!=='default'&&!adminAccess&&!ownedIds.includes(selected.skin_id)){
+      await env.DB.prepare("INSERT INTO player_skin_selection(telegram_id,skin_id) VALUES(?,'default') ON CONFLICT(telegram_id) DO UPDATE SET skin_id='default',updated_at=CURRENT_TIMESTAMP").bind(actor.telegram_id).run();
+      selected={skin_id:'default'};
+    }
+    return json({skins:SKINS,owned:ownedIds,adminAccess,role:actor.role,selected:selected?.skin_id||'default'},200,origin);
    }
    if(url.pathname==='/api/shop/select' && request.method==='POST'){
     const actor=await currentPlayer(request,env);if(!actor)return json({error:'Потрібно увійти через Telegram'},401,origin);
