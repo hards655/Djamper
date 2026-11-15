@@ -106,9 +106,9 @@ th{background:#e5f0d9;color:#365b40}th,td{border-bottom:1px dashed #c5d5bc}
 .skinSwatch{width:43px;height:43px;margin:0 auto 5px;border:2px solid #294b3a;border-radius:45% 45% 35% 35%;display:flex;align-items:center;justify-content:center;font-size:24px}
 .skinItem strong{display:block;font-size:16px}.skinItem small{display:block;font-size:13px;opacity:.75;margin:2px 0 6px}.skinItem button{width:100%;padding:6px 4px;font-size:14px}
 .skinItem.exclusive{border-color:#b88a27;background:#fff6d9}.shopNote{font-size:13px;opacity:.72;line-height:1.35}
-</style></head><body><main id="app"><canvas id="game" aria-label="Нахил або дотики ліворуч і праворуч — рух, угорі — постріл"></canvas><div id="hud" class="hidden"><div><div id="score">0</div><div id="best">РЕКОРД 0</div></div><div class="buttons"><button id="sound" aria-label="Увімкнути або вимкнути звук">♪</button><button id="pause" aria-label="Пауза">Ⅱ</button></div></div><div id="effects"></div><div id="hint" class="hidden">← ДОТИК / НАХИЛ → · УГОРІ — ПОСТРІЛ</div><div id="toast" class="hidden" role="status"></div>
+.mpRoomList{display:grid;gap:8px;margin:12px 0;max-height:260px;overflow:auto}.mpRoomItem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #b9c9aa;border-radius:12px;background:#fffdf6;color:#294b3a}.mpRoomItem small{display:block;font-size:12px;opacity:.75;margin-top:3px}.mpRoomItem button{flex-shrink:0}</style></head><body><main id="app"><canvas id="game" aria-label="Нахил або дотики ліворуч і праворуч — рух, угорі — постріл"></canvas><div id="hud" class="hidden"><div><div id="score">0</div><div id="best">РЕКОРД 0</div></div><div class="buttons"><button id="sound" aria-label="Увімкнути або вимкнути звук">♪</button><button id="pause" aria-label="Пауза">Ⅱ</button></div></div><div id="effects"></div><div id="hint" class="hidden">← ДОТИК / НАХИЛ → · УГОРІ — ПОСТРІЛ</div><div id="toast" class="hidden" role="status"></div>
 <section id="menu" class="overlay"><div class="card"><div class="eyebrow">НЕСКІНЧЕННИЙ ЗОШИТ</div><div class="mascot">••</div><h1>ДЖАМПЕР<br><span></span></h1><p class="subtitle">Вище хмар. Крізь гравітацію.<br>Ще один стрибок — і новий рекорд.</p><div class="accountBox"><div id="accountStatus">Гість · увійди, щоб зберігати рекорди онлайн</div><div id="telegramLogin"></div><button id="adminPanelBtn" class="small hidden">⚙ Керування адмінами</button><button id="logoutBtn" class="small hidden">Вийти з профілю</button></div><div class="row"><button id="leaderboardBtn" class="small wide">🏆 Таблиця гравців</button><button id="shopBtn" class="small wide">🎨 Магазин скінів</button></div><button id="start" class="primary wide">Почати ↑</button><button id="mpBtn" class="wide">👥 Грати разом · до 5 гравців</button><div class="row"><button id="tilt" class="small">Дозволити нахил</button><button id="fullscreen" class="small">⛶ На весь екран</button></div><div class="row"><button id="themeToggle" class="small">☀ Звичайна тема</button><button id="instructionsBtn" class="small">📖 Інструкція</button></div><div id="storageNote" class="footnote">Рекорд зберігається на пристрої. Для датчиків зазвичай потрібен HTTPS / localhost. Дотики доступні завжди.</div></div></section>
-<section id="mpModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">РАЗОМ В ОДНОМУ НЕБІ</div><h2>👥 Мультиплеєр</h2><p class="footnote">Кожен грає у своєму світі, але бачить висоту та рух інших гравців. До 5 учасників.</p><button id="mpCreate" class="primary wide">Створити кімнату · P2P</button><button id="mpCreateServer" class="wide">Створити на сервері</button><div class="row"><input id="mpCodeInput" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="КОД КІМНАТИ" style="min-width:0;width:100%;text-align:center;text-transform:uppercase;font:700 20px Kalam,cursive;border:2px dashed #78966d;border-radius:8px;background:#fffdf6;color:#294b3a"><button id="mpJoin" class="small">Увійти</button></div><div id="mpStatus" class="footnote">Для гри разом увійди через Telegram.</div><div id="mpRoomInfo" class="hidden"><div style="font-size:14px;margin-top:8px">КОД ДЛЯ ДРУЗІВ</div><div id="mpRoomCode" style="font-size:34px;font-weight:900;letter-spacing:5px"></div><div id="mpPlayers" class="footnote"></div><button id="mpCopy" class="small wide">Скопіювати код</button><button id="mpLeave" class="small wide">Вийти з кімнати</button></div><button id="mpClose" class="wide">Назад</button></div></section>
+<section id="mpModal" class="overlay hidden" aria-modal="true" role="dialog"><div class="card leaderboardCard"><div class="eyebrow">РАЗОМ В ОДНОМУ НЕБІ</div><h2>👥 Мультиплеєр</h2><p class="footnote">Кожен грає у своєму світі, але бачить висоту та рух інших гравців. До 5 учасників.</p><button id="mpCreate" class="primary wide">Створити гру · P2P</button><button id="mpCreateServer" class="wide">Створити гру на сервері</button><div id="mpStatus" class="footnote">Відкриті ігри з’являться тут автоматично. Обери гру, щоб одразу приєднатися.</div><div id="mpRoomList" class="mpRoomList"><div class="footnote">Шукаємо відкриті ігри…</div></div><div id="mpRoomInfo" class="hidden"><div id="mpRoomCode" class="hidden"></div><div id="mpPlayers" class="footnote"></div><button id="mpLeave" class="small wide">Вийти з гри</button></div><button id="mpClose" class="wide">Назад</button></div></section>
 <section id="instructionModal" class="overlay hidden" aria-modal="true" role="dialog" aria-labelledby="instructionTitle"><div class="card"><div class="eyebrow">ПРАВИЛА ГРИ</div><h2 id="instructionTitle">Інструкція</h2><div class="instructions"><div class="sectionTitle">КЕРУВАННЯ</div><b>← →</b> Утримуйте ліву / праву половину екрана або нахиляйте телефон.<br><b>↑</b> Торкніться верхньої чверті екрана, щоб стріляти.<br><b>↻</b> Стрибки автоматичні. Краї екрана з’єднані.<br><b>Комп’ютер:</b> A/D або стрілки — рух, пробіл — постріл, P / Esc — пауза.
 <div class="sectionTitle">ПЛАТФОРМИ</div><div class="legend">Зелені — звичайні; сині — рухомі; коричневі — ламаються; пунктирні — зникають після стрибка; червоні — вибухають через 2 секунди після дотику.</div>
 <div class="sectionTitle">ОСОБЛИВІ ПЛАТФОРМИ</div><div class="legend"><b>Фіолетові ↕</b> перевертають напрямок гравітації на 10 секунд: відштовхуйтеся від платформ знизу! Блакитні L — низька гравітація на 10 секунд. Рожеві T — телепорт угору. Оминайте шипи!</div>
@@ -703,7 +703,7 @@ $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('admi
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
 
 /* Lightweight WebRTC star-room: Cloudflare is used for signaling only. */
-let mpSocket=null,mpRoom='',mpRole='',mpMode='p2p',mpPeerId='',mpHostId='',mpConnections=new Map(),mpChannels=new Map(),mpStates=new Map(),mpPendingIce=new Map(),mpLastSend=0;
+let mpSocket=null,mpRoom='',mpRole='',mpMode='p2p',mpStarted=false,mpLastHeartbeat=0,mpPeerId='',mpHostId='',mpConnections=new Map(),mpChannels=new Map(),mpStates=new Map(),mpPendingIce=new Map(),mpLastSend=0;
 const MP_SKINS=Object.fromEntries(SKIN_CATALOG.map(s=>[s.id,s]));
 function mpStatus(message){$('mpStatus').textContent=message;}
 function mpCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;}
@@ -762,7 +762,7 @@ async function mpOnSignal(from,signalType,data){
 function mpConnect(code,role,requestedMode='auto'){
  if(!gameSession?.token){mpStatus('Спочатку відкрий гру через Telegram та увійди в профіль.');return;}
  if(!window.WebSocket||(requestedMode==='p2p'&&!window.RTCPeerConnection)){mpStatus('Цей браузер не підтримує потрібний режим з’єднання.');return;}
- mpDisconnect(false);mpRoom=code;mpRole=role;mpMode=requestedMode==='server'?'server':'p2p';
+ mpDisconnect(false);mpRoom=code;mpRole=role;mpMode=requestedMode==='server'?'server':'p2p';mpStarted=false;
  const scheme=API_BASE.startsWith('https:')?'wss:':'ws:';
  const wsUrl=scheme+'//'+new URL(API_BASE).host+'/api/mp/signal/'+code+'?role='+role+'&mode='+requestedMode+'&token='+encodeURIComponent(gameSession.token);
  mpStatus(role==='host'?(requestedMode==='server'?'Створюємо серверну кімнату…':'Створюємо P2P-кімнату…'):'Підключаємося до кімнати…');
@@ -772,8 +772,9 @@ function mpConnect(code,role,requestedMode='auto'){
   let msg;try{msg=JSON.parse(event.data);}catch(e){return;}
   if(msg.type==='welcome'){
    mpPeerId=String(msg.self);mpHostId=String(msg.players.find(p=>p.role==='host')?.peer||'');mpMode=msg.mode==='server'?'server':'p2p';
-   $('mpRoomCode').textContent=code;$('mpRoomInfo').classList.remove('hidden');
-   mpStatus(mpMode==='server'?'Серверну кімнату створено/підключено. Дані йдуть через Cloudflare.':(role==='host'?'P2P-кімнату створено. Надішли код друзям!':'У кімнаті. Встановлюємо пряме з’єднання…'));mpRenderPlayers();
+   $('mpRoomInfo').classList.remove('hidden');
+   mpStatus(mpMode==='server'?'Підключено до серверної гри.':(role==='host'?'Гру створено. Очікуємо інших гравців…':'Підключено! Завантажуємо карту…'));mpRenderPlayers();
+   if(!mpStarted){mpStarted=true;show('mpModal',false);begin();}
   }else if(msg.type==='player-joined'){
    if(mpMode==='p2p'&&role==='host'&&msg.player?.peer)await mpHostOffer(String(msg.player.peer));
    mpStatus('Приєднався: '+(msg.player?.name||'гравець'));mpRenderPlayers();
@@ -788,7 +789,7 @@ function mpConnect(code,role,requestedMode='auto'){
 function mpDisconnect(update=true){
  if(mpSocket){const s=mpSocket;mpSocket=null;try{s.close(1000,'left room');}catch(e){}}
  for(const pc of mpConnections.values())try{pc.close();}catch(e){}
- mpConnections.clear();mpChannels.clear();mpStates.clear();mpPendingIce.clear();mpRoom='';mpRole='';mpMode='p2p';mpHostId='';
+ mpConnections.clear();mpChannels.clear();mpStates.clear();mpPendingIce.clear();mpRoom='';mpRole='';mpMode='p2p';mpStarted=false;mpLastHeartbeat=0;mpHostId='';
  $('mpRoomInfo').classList.add('hidden');if(update)mpStatus('Ти вийшов із кімнати.');
 }
 function mpBroadcast(){
@@ -814,15 +815,25 @@ function drawMultiplayerGhosts(){
   ctx.fillText((s.name||'Гравець').slice(0,18),0,-23);ctx.fillText('↑ '+(s.score||0),0,29);ctx.restore();
  }
 }
-$('mpBtn').onclick=()=>{show('mpModal',true);mpStatus(gameSession?.token?'Створи кімнату або введи код друга.':'Увійди через Telegram, щоб грати разом.');};
-$('mpClose').onclick=()=>show('mpModal',false);
-$('mpCreate').onclick=()=>{const code=mpCode();$('mpCodeInput').value=code;mpConnect(code,'host','p2p');};
-$('mpCreateServer').onclick=()=>{const code=mpCode();$('mpCodeInput').value=code;mpConnect(code,'host','server');};
-$('mpJoin').onclick=()=>{const code=$('mpCodeInput').value.trim().toUpperCase();if(!/^[A-HJ-NP-Z2-9]{6}$/.test(code)){mpStatus('Введи правильний код із 6 символів.');return;}mpConnect(code,'client','auto');};
-$('mpLeave').onclick=()=>mpDisconnect(true);
-$('mpCopy').onclick=async()=>{try{await navigator.clipboard.writeText(mpRoom);mpStatus('Код кімнати скопійовано!');}catch(e){mpStatus('Код кімнати: '+mpRoom);}};
+let mpListTimer=null;
+async function mpRefreshRooms(){
+ if(!gameSession?.token){$('mpRoomList').innerHTML='<div class="footnote">Увійди через Telegram, щоб бачити відкриті ігри.</div>';return;}
+ try{
+  const res=await fetch(API_BASE+'/api/mp/rooms',{headers:apiHeaders()});
+  const data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося завантажити ігри');
+  const rooms=(data.rooms||[]).filter(r=>r.room_code!==mpRoom);
+  $('mpRoomList').innerHTML=rooms.length?rooms.map(r=>'<div class="mpRoomItem"><div><b>'+escapeHtml(r.host_name||'Гравець')+'</b><small>'+(r.mode==='server'?'☁ Серверна гра':'⚡ P2P')+' · '+Number(r.players||1)+'/5 гравців</small></div><button class="small" data-room="'+escapeHtml(r.room_code)+'">Підключитися</button></div>').join(''):'<div class="footnote">Зараз немає відкритих ігор. Створи нову — і вона з’явиться тут у всіх.</div>';
+  $('mpRoomList').querySelectorAll('button[data-room]').forEach(b=>b.onclick=()=>mpConnect(b.dataset.room,'client','auto'));
+ }catch(e){$('mpRoomList').innerHTML='<div class="footnote">'+escapeHtml(e.message)+'</div>';}
+}
+$('mpBtn').onclick=()=>{show('mpModal',true);mpStatus(gameSession?.token?'Обери відкриту гру або створи свою.':'Увійди через Telegram, щоб грати разом.');mpRefreshRooms();if(mpListTimer)clearInterval(mpListTimer);mpListTimer=setInterval(mpRefreshRooms,5000);};
+$('mpClose').onclick=()=>{show('mpModal',false);if(mpListTimer)clearInterval(mpListTimer);mpListTimer=null;};
+$('mpCreate').onclick=()=>{const code=mpCode();mpConnect(code,'host','p2p');};
+$('mpCreateServer').onclick=()=>{const code=mpCode();mpConnect(code,'host','server');};
+$('mpLeave').onclick=()=>{mpDisconnect(true);show('mpModal',true);mpRefreshRooms();};
+
 $('mpModal').addEventListener('click',e=>{if(e.target===$('mpModal'))show('mpModal',false);});
-setInterval(()=>{if(mpRoom&&performance.now()-mpLastSend>90){mpLastSend=performance.now();mpBroadcast();}},100);
+setInterval(()=>{if(mpRoom&&mpSocket?.readyState===WebSocket.OPEN){const now=performance.now();if(now-mpLastSend>90){mpLastSend=now;mpBroadcast();}if(mpRole==='host'&&now-mpLastHeartbeat>15000){mpLastHeartbeat=now;try{mpSocket.send(JSON.stringify({type:'heartbeat'}));}catch(e){}}}},100);
 
 setAccountUI();authenticateMiniApp();
 
