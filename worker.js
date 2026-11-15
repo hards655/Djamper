@@ -58,6 +58,7 @@ async function referralProfile(env,telegramId){
  return {referralCode:row?.referral_code||null,referralCount:Number(count?.n||0)};
 }
 async function processReferral(env,inviteeId,startParam){
+ await ensureShopTables(env);
  if(!startParam || !/^ref_[a-f0-9]{12}$/i.test(startParam)) return null;
  const code=startParam.slice(4).toLowerCase();
  const inviter=await env.DB.prepare('SELECT telegram_id FROM player_referral_codes WHERE referral_code=?').bind(code).first();
@@ -203,6 +204,9 @@ export default {
       await env.DB.prepare(`DELETE FROM player_skins WHERE telegram_id=? AND NOT EXISTS (
         SELECT 1 FROM skin_purchases p WHERE p.telegram_id=player_skins.telegram_id
         AND p.skin_id=player_skins.skin_id AND p.status='paid'
+      ) AND NOT EXISTS (
+        SELECT 1 FROM referral_rewards rr WHERE rr.inviter_id=player_skins.telegram_id
+        AND rr.skin_id=player_skins.skin_id
       )`).bind(actor.telegram_id).run();
     }
     const owned=await env.DB.prepare('SELECT skin_id FROM player_skins WHERE telegram_id=?').bind(actor.telegram_id).all();
