@@ -223,7 +223,7 @@ export default {
     const actor=await currentPlayer(request,env);
     if(!actor || actor.role!=='creator') return json({error:'Змінювати очки може лише творець'},403,origin);
     const body=await request.json(),target=String(body.telegram_id||''),action=body.action;
-    if(!/^\\d{1,24}$/.test(target) || !['set','restore'].includes(action)) return json({error:'Некоректний гравець або дія'},400,origin);
+    if(!/^\d{1,24}$/.test(target) || !['set','restore'].includes(action)) return json({error:'Некоректний гравець або дія'},400,origin);
     await ensureScoreAudit(env);
     let result;
     if(action==='set'){
