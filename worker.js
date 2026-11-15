@@ -41,6 +41,36 @@ async function verifyTelegram(env, initData){
 }
 
 const SKINS=[{"id":"mint","name":"М’ятка","price":5},{"id":"ocean","name":"Океан","price":5},{"id":"sunset","name":"Захід","price":6},{"id":"lavender","name":"Лаванда","price":6},{"id":"flame","name":"Полум’я","price":7},{"id":"forest","name":"Лісовик","price":7},{"id":"galaxy","name":"Космос","price":8},{"id":"neon","name":"Неон","price":8},{"id":"rainbow","name":"Веселка","price":10},{"id":"crown","name":"Королівський","price":50},{"id":"admin","name":"Адмінський","price":2000},{"id":"creator","name":"Скін творця","price":10000},{"id":"glass","name":"Кристал","price":25},{"id":"robot","name":"Робот","price":5},{"id":"ninja","name":"Ніндзя","price":6},{"id":"alien","name":"Прибулець","price":7},{"id":"pirate","name":"Пірат","price":8},{"id":"knight","name":"Лицар","price":9},{"id":"panda","name":"Панда","price":5},{"id":"fox","name":"Лисичка","price":6},{"id":"astronaut","name":"Космонавт","price":10},{"id":"slime","name":"Слайм","price":7},{"id":"dragon","name":"Дракончик","price":10},{"id":"skeleton","name":"Скелет","price":150},{"id":"santa","name":"Дід Мороз","price":200},{"id":"saint","name":"Св. Миколай","price":150},{"id":"kapitoshka","name":"Капітошка","price":20},{"id":"lich","name":"Ліч — Жнець","price":250},{"id":"theme_classic","name":"Класичний зошит","price":150},{"id":"theme_winter","name":"Зимовий світ","price":150},{"id":"level_forest","name":"Смарагдовий ліс","price":150},{"id":"level_desert","name":"Золоті дюни","price":150},{"id":"level_candy","name":"Цукровий світ","price":150},{"id":"level_volcano","name":"Вулканічний край","price":150}];
+
+async function ensureReferralTables(env){
+ await env.DB.prepare("CREATE TABLE IF NOT EXISTS player_referral_codes (telegram_id TEXT PRIMARY KEY, referral_code TEXT NOT NULL UNIQUE, created_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+ await env.DB.prepare("CREATE TABLE IF NOT EXISTS referral_rewards (invitee_id TEXT PRIMARY KEY, inviter_id TEXT NOT NULL, skin_id TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+}
+async function referralProfile(env,telegramId){
+ await ensureReferralTables(env);
+ let row=await env.DB.prepare('SELECT referral_code FROM player_referral_codes WHERE telegram_id=?').bind(String(telegramId)).first();
+ if(!row){
+  const code=crypto.randomUUID().replace(/-/g,'').slice(0,12);
+  await env.DB.prepare('INSERT OR IGNORE INTO player_referral_codes(telegram_id,referral_code) VALUES(?,?)').bind(String(telegramId),code).run();
+  row=await env.DB.prepare('SELECT referral_code FROM player_referral_codes WHERE telegram_id=?').bind(String(telegramId)).first();
+ }
+ const count=await env.DB.prepare('SELECT COUNT(*) AS n FROM referral_rewards WHERE inviter_id=?').bind(String(telegramId)).first();
+ return {referralCode:row?.referral_code||null,referralCount:Number(count?.n||0)};
+}
+async function processReferral(env,inviteeId,startParam){
+ if(!startParam || !/^ref_[a-f0-9]{12}$/i.test(startParam)) return null;
+ const code=startParam.slice(4).toLowerCase();
+ const inviter=await env.DB.prepare('SELECT telegram_id FROM player_referral_codes WHERE referral_code=?').bind(code).first();
+ if(!inviter || String(inviter.telegram_id)===String(inviteeId)) return null;
+ const rewardPool=SKINS.filter(s=>s.id!=='admin'&&s.id!=='creator'&&!s.id.startsWith('theme_')&&!s.id.startsWith('level_'));
+ if(!rewardPool.length) return null;
+ const skin=rewardPool[Math.floor(Math.random()*rewardPool.length)];
+ const inserted=await env.DB.prepare('INSERT OR IGNORE INTO referral_rewards(invitee_id,inviter_id,skin_id) VALUES(?,?,?)').bind(String(inviteeId),String(inviter.telegram_id),skin.id).run();
+ if(Number(inserted.meta?.changes||0)!==1) return null;
+ await env.DB.prepare('INSERT OR IGNORE INTO player_skins(telegram_id,skin_id) VALUES(?,?)').bind(String(inviter.telegram_id),skin.id).run();
+ return {skinId:skin.id,skinName:skin.name,inviterId:String(inviter.telegram_id)};
+}
+
 async function ensureScoreAudit(env){
   try{await env.DB.prepare('ALTER TABLE players ADD COLUMN legit_best_score INTEGER').run();}catch(e){}
   await env.DB.prepare('UPDATE players SET legit_best_score=COALESCE(legit_best_score,best_score,0) WHERE legit_best_score IS NULL').run();
@@ -137,15 +167,23 @@ export default {
     const user=await verifyTelegram(env,body.initData);
     if(!user) return json({error:'Telegram Mini App initData недійсний або застарілий'},401,origin);
     const id=String(user.id);
+    const existing=await env.DB.prepare('SELECT telegram_id FROM players WHERE telegram_id=?').bind(id).first();
     await env.DB.prepare(`INSERT INTO players(telegram_id,username,first_name,last_name,photo_url)
       VALUES(?,?,?,?,?) ON CONFLICT(telegram_id) DO UPDATE SET username=excluded.username,
       first_name=excluded.first_name,last_name=excluded.last_name,photo_url=excluded.photo_url,updated_at=CURRENT_TIMESTAMP`)
       .bind(id,user.username||null,user.first_name||null,user.last_name||null,user.photo_url||null).run();
+    let referralReward=null;
+    await ensureReferralTables(env);
+    if(!existing){
+      const startParam=new URLSearchParams(body.initData).get('start_param')||'';
+      referralReward=await processReferral(env,id,startParam);
+    }
     if(String(env.CREATOR_TELEGRAM_ID||'')===id){
       await env.DB.prepare("UPDATE players SET role='creator',updated_at=CURRENT_TIMESTAMP WHERE telegram_id=?").bind(id).run();
     }
     const player=await env.DB.prepare('SELECT telegram_id,username,first_name,last_name,photo_url,best_score,games,role FROM players WHERE telegram_id=?').bind(id).first();
-    return json({token:await issueToken(env,id),user:player},200,origin);
+    const referral=await referralProfile(env,id);
+    return json({token:await issueToken(env,id),user:player,...referral,referralReward},200,origin);
    }
 
    if(url.pathname==='/api/admin/payments/setup' && request.method==='POST'){
