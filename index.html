@@ -228,6 +228,7 @@ body.winter #levelProgress{background:linear-gradient(180deg,#29495def,#172e40ed
   <div class="card leaderboardCard">
     <div class="eyebrow">ПАНЕЛЬ ТВОРЦЯ</div><h2>⚙ Керування ролями</h2>
     <div id="adminStatus" class="footnote">Завантаження гравців…</div>
+    <button id="restoreAllScores" class="adminAction" style="margin:8px 0">↩️ Повернути чесні рекорди всіх гравців</button>
     <div class="tableWrap"><table><thead><tr><th>Гравець</th><th>Telegram ID</th><th>Роль</th><th>Очки</th><th>Роль</th><th>Керування очками</th></tr></thead><tbody id="adminRows"></tbody></table></div>
     <p class="footnote">Лише творець може призначати та знімати адміністраторів. Роль творця захищена.</p>
     <button id="closeAdmin" class="primary wide">Готово</button>
@@ -1098,6 +1099,10 @@ async function showAdminPanel(){
   $('adminRows').querySelectorAll('button[data-score-id]').forEach(b=>b.addEventListener('click',()=>changePlayerScore(b.dataset.scoreId,b.dataset.scoreAction)));
  }catch(e){$('adminStatus').textContent=e.message;}
 }
+async function restoreAllPlayerScores(){
+ if(!confirm('Повернути всім гравцям збережені чесні рекорди? Усі встановлені вручну очки буде скасовано.'))return;
+ try{const res=await fetch(API_BASE+'/api/admin/score',{method:'POST',headers:apiHeaders(),body:JSON.stringify({action:'restore_all'})});const data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося відновити рекорди');await showAdminPanel();toast('Відновлено чесні рекорди для '+Number(data.restored||0)+' гравців');}catch(e){toast(e.message);}
+}
 async function changePlayerScore(id,action){
  const row=[...$('adminRows').querySelectorAll('button[data-score-id]')].find(b=>b.dataset.scoreId===id)?.closest('tr');
  const current=row?Number(row.querySelector('td:nth-child(4) b')?.textContent.replace(/\D/g,''))||0:0;
@@ -1112,7 +1117,7 @@ async function changePlayerScore(id,action){
  try{
   const res=await fetch(API_BASE+'/api/admin/score',{method:'POST',headers:apiHeaders(),body:JSON.stringify({telegram_id:id,action,score})});
   const data=await res.json();if(!res.ok)throw new Error(data.error||'Не вдалося змінити очки');
-  await showAdminPanel();toast(action==='restore'?'Повернуто чесний рекорд: '+Number(data.best).toLocaleString('uk-UA'):'Очки оновлено');
+  await showAdminPanel();const ownId=String(gameSession?.user?.telegram_id||gameSession?.user?.id||'');if(ownId===String(id)){best=Number(data.best)||0;try{localStorage.setItem('notebook-jump-best-v1',String(best));}catch(e){}updateHUD();}toast(action==='restore'?'Повернуто чесний рекорд: '+Number(data.best).toLocaleString('uk-UA'):'Очки оновлено; рівень перераховано');
  }catch(e){toast(e.message);}
 }
 async function changeRole(id,role){
@@ -1125,6 +1130,7 @@ async function changeRole(id,role){
 }
 $('leaderboardBtn').onclick=showLeaderboard;$('shopBtn').onclick=loadShop;$('closeShop').onclick=()=>show('shopModal',false);$('paymentSetupBtn').onclick=async()=>{try{$('shopStatus').textContent='Підключаємо Telegram webhook…';const res=await fetch(API_BASE+'/api/admin/payments/setup',{method:'POST',headers:apiHeaders(),body:'{}'}),data=await res.json();if(!res.ok)throw new Error(data.error||'Помилка налаштування');$('shopStatus').textContent='Оплату Telegram Stars підключено! ⭐';}catch(e){$('shopStatus').textContent=e.message;}};$('closeLeaderboard').onclick=()=>show('leaderboardModal',false);
 $('adminPanelBtn').onclick=showAdminPanel;$('closeAdmin').onclick=()=>show('adminModal',false);
+$('restoreAllScores').onclick=restoreAllPlayerScores;
 $('logoutBtn').onclick=()=>{gameSession=null;localStorage.removeItem(SESSION_KEY);setAccountUI();toast('Вихід із профілю виконано');};
 
 /* Lightweight WebRTC star-room: Cloudflare is used for signaling only. */
